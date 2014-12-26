@@ -1,0 +1,32 @@
+{
+  "name": "nextgen",
+  "version": "0.0.1",
+  "description": "Composable ES6 Generator Transformations",
+  "main": "nextgen.js",
+  "scripts": {
+    "test": "make test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kevinbeaty/nextgen"
+  },
+  "keywords": [
+    "generator",
+    "iterator",
+    "transducer",
+    "es6"
+  ],
+  "author": "Kevin Beaty",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/kevinbeaty/nextgen/issues"
+  },
+  "homepage": "http://github.com/kevinbeaty/nextgen",
+  "dependencies": {
+    "iterator-protocol": "~0.1.0",
+    "transduce-compose": "~0.1.0"
+  },
+  "devDependencies": {
+    "tape": "~3.0.0"
+  }
+}
