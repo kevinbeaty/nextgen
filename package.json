@@ -27,6 +27,9 @@
     "transduce-compose": "~0.1.0"
   },
   "devDependencies": {
-    "tape": "~3.0.0"
+    "tape": "~3.0.0",
+    "regenerator": "~0.8.2",
+    "uglify-js": "~2.4.16",
+    "browserify": "~8.0.2"
   }
 }

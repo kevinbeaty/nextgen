@@ -1,6 +1,6 @@
 PROJECT:=nextgen
 
-JS_TARGET ?= build/$(PROJECT).js
+JS_TARGET ?= build/$(PROJECT)
 
 .PHONY: all clean js test serve
 all: test js
@@ -20,10 +20,13 @@ node_modules:
 %.gz: %
 	gzip -c9 $^ > $@
 
-js: $(JS_TARGET) $(JS_TARGET:.js=.min.js)
+js: $(JS_TARGET).js $(JS_TARGET).min.js
 
-$(JS_TARGET): $(PROJECT).js | build
+$(JS_TARGET).js: $(JS_TARGET).reg.js
 	`npm bin`/browserify $< > $@
+	
+$(JS_TARGET).reg.js: $(PROJECT).js | build
+	`npm bin`/regenerator $< > $@
 
 build:
 	mkdir -p build

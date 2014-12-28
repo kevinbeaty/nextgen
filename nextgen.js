@@ -18,6 +18,10 @@ function iterate(nextGen, genAppend, iter){
   return genNext.value;
 }
 
+function generate(nextGen, gen){
+  return init(nextGen(gen));
+}
+
 function init(nextGen){
   if(nextGen){
     var gen = nextGen();
