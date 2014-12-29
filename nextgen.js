@@ -2,9 +2,11 @@
 import {iterator} from 'iterator-protocol'
 import compose from 'transduce-compose'
 
+export {compose}
+
 var slice = Array.prototype.slice
 
-function iterate(nextGen, genAppend, iter){
+export function iterate(nextGen, genAppend, iter){
   var iterNext, genNext
   var gen = init(nextGen(genAppend()))
   iter = iterator(iter)
@@ -18,11 +20,7 @@ function iterate(nextGen, genAppend, iter){
   return genNext.value
 }
 
-function generate(nextGen, gen){
-  return init(nextGen(gen))
-}
-
-function init(nextGen){
+export function init(nextGen){
   if(nextGen){
     var gen = nextGen()
     gen.next()
@@ -30,18 +28,14 @@ function init(nextGen){
   }
 }
 
-function dispatch(gen){
+export function dispatch(gen){
   return function(){
       var args = slice.call(arguments)
-      return function(nextGen){
-        return function(){
-          return gen.apply(null, args.concat(init(nextGen)))
-        }
-      }
+      return (nextGen) => () => gen.apply(null, args.concat(init(nextGen)))
   }
 }
 
-var genArray = dispatch(arrayGen)()
+export var genArray = dispatch(arrayGen)()
 function* arrayGen(){
   var arr = []
   while(true){
@@ -53,11 +47,11 @@ function* arrayGen(){
   }
 }
 
-function toArray(nextGen, iter){
+export function toArray(nextGen, iter){
   return iterate(nextGen, genArray, iter)
 }
 
-var map = dispatch(mapGen)
+export var map = dispatch(mapGen)
 function* mapGen(f, gen){
   var next, result = {}
   while(!result.done){
@@ -70,7 +64,7 @@ function* mapGen(f, gen){
   return result.value
 }
 
-var filter = dispatch(filterGen)
+export var filter = dispatch(filterGen)
 function* filterGen(p, gen){
   var next, result = {}
   while(!result.done){
@@ -82,7 +76,7 @@ function* filterGen(p, gen){
   return result.value
 }
 
-var remove = dispatch(removeGen)
+export var remove = dispatch(removeGen)
 function* removeGen(p, gen){
   return yield* filterGen(not(p), gen)
 }
@@ -93,7 +87,7 @@ function not(p){
   }
 }
 
-var take = dispatch(takeGen)
+export var take = dispatch(takeGen)
 function* takeGen(n, gen){
   var result = {}, i = 0
   while(!result.done){
@@ -105,7 +99,7 @@ function* takeGen(n, gen){
   return result.value
 }
 
-var takeWhile = dispatch(takeWhileGen)
+export var takeWhile = dispatch(takeWhileGen)
 function* takeWhileGen(p, gen){
   var next, result = {}
   while(!result.done){
@@ -119,7 +113,7 @@ function* takeWhileGen(p, gen){
   return result.value
 }
 
-var drop = dispatch(dropGen)
+export var drop = dispatch(dropGen)
 function* dropGen(n, gen){
   var result = {}, next, i = 0
   while(!result.done){
@@ -131,7 +125,7 @@ function* dropGen(n, gen){
   return result.value
 }
 
-var dropWhile = dispatch(dropWhileGen)
+export var dropWhile = dispatch(dropWhileGen)
 function* dropWhileGen(p, gen){
   var next, result = {}
   while(!result.done){
@@ -144,7 +138,7 @@ function* dropWhileGen(p, gen){
   return result.value
 }
 
-var cat = dispatch(catGen)()
+export var cat = dispatch(catGen)()
 function* catGen(gen){
   var next, iter, inext, result = {}
   while(!result.done){
@@ -163,11 +157,11 @@ function* catGen(gen){
   return result.value
 }
 
-function mapcat(f){
+export function mapcat(f){
   return compose(map(f), cat)
 }
 
-var partitionAll = dispatch(partitionAllGen)
+export var partitionAll = dispatch(partitionAllGen)
 function* partitionAllGen(n, gen){
   var result = {}, next, ins = []
   while(!result.done){
@@ -193,7 +187,7 @@ function* partitionAllGen(n, gen){
   return result.value
 }
 
-var partitionBy = dispatch(partitionByGen)
+export var partitionBy = dispatch(partitionByGen)
 function* partitionByGen(p, gen){
   var result = {}, next, ins, prev, curr
   while(!result.done){
@@ -221,24 +215,4 @@ function* partitionByGen(p, gen){
     result = gen.next({done: true})
   }
   return result.value
-}
-
-module.exports = {
-  iterate: iterate,
-  toArray: toArray,
-  compose: compose,
-  init: init,
-  dispatch: dispatch,
-  genArray: genArray,
-  map: map,
-  filter: filter,
-  remove: remove,
-  take: take,
-  takeWhile: takeWhile,
-  drop: drop,
-  dropWhile: dropWhile,
-  cat: cat,
-  mapcat: mapcat,
-  partitionAll: partitionAll,
-  partitionBy: partitionBy
 }

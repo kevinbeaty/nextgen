@@ -2,7 +2,7 @@ PROJECT:=nextgen
 
 JS_TARGET ?= build/$(PROJECT).js
 
-.PHONY: all clean js test serve
+.PHONY: all clean js test
 all: test js
 
 clean:
