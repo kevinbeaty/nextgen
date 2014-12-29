@@ -9,7 +9,7 @@ clean:
 	rm -rf build
 
 test: | node_modules
-	node --harmony `npm bin`/tape test/*.js
+	`npm bin`/6to5-node `npm bin`/tape test/*.js
 
 node_modules:
 	npm install
