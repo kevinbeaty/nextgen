@@ -1,226 +1,226 @@
-"use strict";
-var ip = require('iterator-protocol'),
-    compose = require('transduce-compose'),
-    iterator = ip.iterator,
-    slice = Array.prototype.slice;
+"use strict"
+import {iterator} from 'iterator-protocol'
+import compose from 'transduce-compose'
+
+var slice = Array.prototype.slice
 
 function iterate(nextGen, genAppend, iter){
-  var iterNext, genNext;
-  var gen = init(nextGen(genAppend()));
-  iter = iterator(iter);
+  var iterNext, genNext
+  var gen = init(nextGen(genAppend()))
+  iter = iterator(iter)
   while(true){
-    iterNext = iter.next();
-    genNext = gen.next(iterNext);
+    iterNext = iter.next()
+    genNext = gen.next(iterNext)
     if(iterNext.done || genNext.done){
-      break;
+      break
     }
   }
-  return genNext.value;
+  return genNext.value
 }
 
 function generate(nextGen, gen){
-  return init(nextGen(gen));
+  return init(nextGen(gen))
 }
 
 function init(nextGen){
   if(nextGen){
-    var gen = nextGen();
-    gen.next();
-    return gen;
+    var gen = nextGen()
+    gen.next()
+    return gen
   }
 }
 
 function dispatch(gen){
   return function(){
-      var args = slice.call(arguments);
+      var args = slice.call(arguments)
       return function(nextGen){
         return function(){
-          return gen.apply(null, args.concat(init(nextGen)));
-        };
-      };
-  };
+          return gen.apply(null, args.concat(init(nextGen)))
+        }
+      }
+  }
 }
 
-var genArray = dispatch(arrayGen)();
+var genArray = dispatch(arrayGen)()
 function* arrayGen(){
-  var arr = [];
+  var arr = []
   while(true){
-    var next = yield 0;
+    var next = yield 0
     if(next.done){
-      return arr;
+      return arr
     }
-    arr.push(next.value);
+    arr.push(next.value)
   }
 }
 
 function toArray(nextGen, iter){
-  return iterate(nextGen, genArray, iter);
+  return iterate(nextGen, genArray, iter)
 }
 
-var map = dispatch(mapGen);
+var map = dispatch(mapGen)
 function* mapGen(f, gen){
-  var next, result = {};
+  var next, result = {}
   while(!result.done){
-    next = yield 0;
+    next = yield 0
     if(!next.done){
-      next.value = f(next.value); 
+      next.value = f(next.value) 
     }
-    result = gen.next(next);
+    result = gen.next(next)
   }
-  return result.value;
+  return result.value
 }
 
-var filter = dispatch(filterGen);
+var filter = dispatch(filterGen)
 function* filterGen(p, gen){
-  var next, result = {};
+  var next, result = {}
   while(!result.done){
-    next = yield 0;
+    next = yield 0
     if(next.done || p(next.value)){
-      result = gen.next(next);
+      result = gen.next(next)
     }
   }
-  return result.value;
+  return result.value
 }
 
-var remove = dispatch(removeGen);
+var remove = dispatch(removeGen)
 function* removeGen(p, gen){
-  return yield* filterGen(not(p), gen);
+  return yield* filterGen(not(p), gen)
 }
 
 function not(p){
   return function(val){
-    return !p(val);
-  };
+    return !p(val)
+  }
 }
 
-var take = dispatch(takeGen);
+var take = dispatch(takeGen)
 function* takeGen(n, gen){
-  var result = {}, i = 0;
+  var result = {}, i = 0
   while(!result.done){
-    result = gen.next(yield 0);
+    result = gen.next(yield 0)
     if(!result.done && ++i >= n){
-      result = gen.next({done: true});
+      result = gen.next({done: true})
     }
   }
-  return result.value;
+  return result.value
 }
 
-var takeWhile = dispatch(takeWhileGen);
+var takeWhile = dispatch(takeWhileGen)
 function* takeWhileGen(p, gen){
-  var next, result = {};
+  var next, result = {}
   while(!result.done){
-    next = yield 0;
+    next = yield 0
     if(next.done || p(next.value)){
-      result = gen.next(next);
+      result = gen.next(next)
     } else {
-      result = gen.next({done: true});
+      result = gen.next({done: true})
     }
   }
-  return result.value;
+  return result.value
 }
 
-var drop = dispatch(dropGen);
+var drop = dispatch(dropGen)
 function* dropGen(n, gen){
-  var result = {}, next, i = 0;
+  var result = {}, next, i = 0
   while(!result.done){
-    next = yield 0;
+    next = yield 0
     if(next.done || i++ >= n){
-      result = gen.next(next);
+      result = gen.next(next)
     }
   }
-  return result.value;
+  return result.value
 }
 
-var dropWhile = dispatch(dropWhileGen);
+var dropWhile = dispatch(dropWhileGen)
 function* dropWhileGen(p, gen){
-  var next, result = {};
+  var next, result = {}
   while(!result.done){
-    next = yield 0;
+    next = yield 0
     if(next.done || !(p && p(next.value))){
-      result = gen.next(next);
-      p = null;
+      result = gen.next(next)
+      p = null
     }
   }
-  return result.value;
+  return result.value
 }
 
-var cat = dispatch(catGen)();
+var cat = dispatch(catGen)()
 function* catGen(gen){
-  var next, iter, inext, result = {};
+  var next, iter, inext, result = {}
   while(!result.done){
-    next = yield 0;
+    next = yield 0
     if(next.done){
-      result = gen.next(next);
+      result = gen.next(next)
     } else {
-      iter = iterator(next.value);
-      inext = iter.next();
+      iter = iterator(next.value)
+      inext = iter.next()
       while(!inext.done && !result.done){
-        result = gen.next(inext);
-        inext = iter.next();
+        result = gen.next(inext)
+        inext = iter.next()
       }
     }
   }
-  return result.value;
+  return result.value
 }
 
 function mapcat(f){
-  return compose(map(f), cat);
+  return compose(map(f), cat)
 }
 
-var partitionAll = dispatch(partitionAllGen);
+var partitionAll = dispatch(partitionAllGen)
 function* partitionAllGen(n, gen){
-  var result = {}, next, ins = [];
+  var result = {}, next, ins = []
   while(!result.done){
-    next = yield 0;
+    next = yield 0
     if(next.done){
-      break;
+      break
     }
 
-    ins.push(next.value);
+    ins.push(next.value)
     if(n === ins.length){
-      result = gen.next({done: false, value: ins});
-      ins = [];
+      result = gen.next({done: false, value: ins})
+      ins = []
     }
   }
 
   if(!result.done && ins.length){
-    result = gen.next({done: false, value: ins});
+    result = gen.next({done: false, value: ins})
   }
 
   if(!result.done){
-    result = gen.next({done: true});
+    result = gen.next({done: true})
   }
-  return result.value;
+  return result.value
 }
 
-var partitionBy = dispatch(partitionByGen);
+var partitionBy = dispatch(partitionByGen)
 function* partitionByGen(p, gen){
-  var result = {}, next, ins, prev, curr;
+  var result = {}, next, ins, prev, curr
   while(!result.done){
-    prev = curr;
-    next = yield 0;
+    prev = curr
+    next = yield 0
     if(next.done){
-      break;
+      break
     }
-    curr = p(next.value);
+    curr = p(next.value)
     if(ins === void 0){
-      ins = [next.value];
+      ins = [next.value]
     } else if(prev === curr){
-      ins.push(next.value);
+      ins.push(next.value)
     } else {
-      result = gen.next({done: false, value: ins});
-      ins = [next.value];
+      result = gen.next({done: false, value: ins})
+      ins = [next.value]
     }
   }
 
   if(!result.done && ins.length){
-    result = gen.next({done: false, value: ins});
+    result = gen.next({done: false, value: ins})
   }
 
   if(!result.done){
-    result = gen.next({done: true});
+    result = gen.next({done: true})
   }
-  return result.value;
+  return result.value
 }
 
 module.exports = {
@@ -241,4 +241,4 @@ module.exports = {
   mapcat: mapcat,
   partitionAll: partitionAll,
   partitionBy: partitionBy
-};
+}
