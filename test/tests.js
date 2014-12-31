@@ -141,16 +141,23 @@ test('compose manual iterate', function(t){
   var nextGen = ng.compose(ng.map(plus(1)), ng.filter(isOdd), ng.map(plus(3)), ng.take(3))
   var gen = nextGen([])
   gen.next()
+
   var next = gen.next({done: false, value: 0})
-  t.strictEqual(false, next.done)
+  t.deepEqual(next, {done: false, value: [4]})
+
   next = gen.next({done: false, value: 1})
-  t.strictEqual(false, next.done)
+  t.deepEqual(next, {done: false, value: [4]})
+
   next = gen.next({done: false, value: 2})
-  t.strictEqual(false, next.done)
+  t.deepEqual(next, {done: false, value: [4, 6]})
+
   next = gen.next({done: false, value: 3})
+  t.deepEqual(next, {done: false, value: [4, 6]})
+
   t.strictEqual(false, next.done)
   next = gen.next({done: false, value: 4})
-  t.strictEqual(true, next.done)
+  t.deepEqual(next, {done: true, value: [4, 6, 8]})
+
   t.deepEqual([4, 6, 8], next.value)
   t.end()
 })

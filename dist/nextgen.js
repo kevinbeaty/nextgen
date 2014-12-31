@@ -44,7 +44,7 @@ function mapcat(f){
         }
 
         context$3$0.next = 4;
-        return 0;
+        return arr;
       case 4:
         next = context$3$0.sent;
 
@@ -75,7 +75,7 @@ function mapcat(f){
     return regeneratorRuntime.wrap(function cat$(context$3$0) {
       while (1) switch (context$3$0.prev = context$3$0.next) {
       case 0:
-        result = {};
+        result = gen.next();
       case 1:
         if (result.done) {
           context$3$0.next = 8;
@@ -83,7 +83,7 @@ function mapcat(f){
         }
 
         context$3$0.next = 4;
-        return 0;
+        return result.value;
       case 4:
         next = context$3$0.sent;
         if(next.done){
@@ -123,7 +123,6 @@ function dispatch(gen){
         if(nextGen === void 0 || Array.isArray(nextGen)){
           nextGen = arrayGen(nextGen)
         }
-        nextGen.next()
         return gen.apply(null, args.concat(nextGen))
       }
   }
@@ -133,12 +132,12 @@ function dispatch(gen){
   'use strict';
 
   var drop = regeneratorRuntime.mark(function drop(n, gen) {
-    var result, next, i;
+    var next, i, result;
 
     return regeneratorRuntime.wrap(function drop$(context$3$0) {
       while (1) switch (context$3$0.prev = context$3$0.next) {
       case 0:
-        result = {}, i = 0;
+        i = 0, result = gen.next();
       case 1:
         if (result.done) {
           context$3$0.next = 8;
@@ -146,7 +145,7 @@ function dispatch(gen){
         }
 
         context$3$0.next = 4;
-        return 0;
+        return result.value;
       case 4:
         next = context$3$0.sent;
         if(next.done || i++ >= n){
@@ -173,7 +172,7 @@ function dispatch(gen){
     return regeneratorRuntime.wrap(function dropWhile$(context$3$0) {
       while (1) switch (context$3$0.prev = context$3$0.next) {
       case 0:
-        result = {};
+        result = gen.next();
       case 1:
         if (result.done) {
           context$3$0.next = 8;
@@ -181,7 +180,7 @@ function dispatch(gen){
         }
 
         context$3$0.next = 4;
-        return 0;
+        return result.value;
       case 4:
         next = context$3$0.sent;
         if(next.done || !(p && p(next.value))){
@@ -209,7 +208,7 @@ function dispatch(gen){
     return regeneratorRuntime.wrap(function filter$(context$3$0) {
       while (1) switch (context$3$0.prev = context$3$0.next) {
       case 0:
-        result = {};
+        result = gen.next();
       case 1:
         if (result.done) {
           context$3$0.next = 8;
@@ -217,7 +216,7 @@ function dispatch(gen){
         }
 
         context$3$0.next = 4;
-        return 0;
+        return result.value;
       case 4:
         next = context$3$0.sent;
         if(next.done || p(next.value)){
@@ -273,7 +272,7 @@ LazyIterable.prototype[ip.symbol] = function(){
     return regeneratorRuntime.wrap(function map$(context$3$0) {
       while (1) switch (context$3$0.prev = context$3$0.next) {
       case 0:
-        result = {};
+        result = gen.next();
       case 1:
         if (result.done) {
           context$3$0.next = 9;
@@ -281,7 +280,7 @@ LazyIterable.prototype[ip.symbol] = function(){
         }
 
         context$3$0.next = 4;
-        return 0;
+        return result.value;
       case 4:
         next = context$3$0.sent;
         if(!next.done){
@@ -304,12 +303,12 @@ LazyIterable.prototype[ip.symbol] = function(){
   'use strict';
 
   var partitionAll = regeneratorRuntime.mark(function partitionAll(n, gen) {
-    var result, next, ins;
+    var next, ins, result;
 
     return regeneratorRuntime.wrap(function partitionAll$(context$3$0) {
       while (1) switch (context$3$0.prev = context$3$0.next) {
       case 0:
-        result = {}, ins = [];
+        ins = [], result = gen.next();
       case 1:
         if (result.done) {
           context$3$0.next = 11;
@@ -317,7 +316,7 @@ LazyIterable.prototype[ip.symbol] = function(){
         }
 
         context$3$0.next = 4;
-        return 0;
+        return result.value;
       case 4:
         next = context$3$0.sent;
 
@@ -356,12 +355,12 @@ LazyIterable.prototype[ip.symbol] = function(){
   'use strict';
 
   var partitionBy = regeneratorRuntime.mark(function partitionBy(p, gen) {
-    var result, next, ins, prev, curr;
+    var next, ins, prev, curr, result;
 
     return regeneratorRuntime.wrap(function partitionBy$(context$3$0) {
       while (1) switch (context$3$0.prev = context$3$0.next) {
       case 0:
-        result = {};
+        result = gen.next();
       case 1:
         if (result.done) {
           context$3$0.next = 12;
@@ -370,7 +369,7 @@ LazyIterable.prototype[ip.symbol] = function(){
 
         prev = curr;
         context$3$0.next = 5;
-        return 0;
+        return result.value;
       case 5:
         next = context$3$0.sent;
 
@@ -439,12 +438,12 @@ LazyIterable.prototype[ip.symbol] = function(){
   'use strict';
 
   var take = regeneratorRuntime.mark(function take(n, gen) {
-    var result, i;
+    var i, result;
 
     return regeneratorRuntime.wrap(function take$(context$3$0) {
       while (1) switch (context$3$0.prev = context$3$0.next) {
       case 0:
-        result = {}, i = 0;
+        i = 0, result = gen.next();
       case 1:
         if (result.done) {
           context$3$0.next = 9;
@@ -452,7 +451,7 @@ LazyIterable.prototype[ip.symbol] = function(){
         }
 
         context$3$0.next = 4;
-        return 0;
+        return result.value;
       case 4:
         context$3$0.t1 = context$3$0.sent;
         result = gen.next(context$3$0.t1);
@@ -480,7 +479,7 @@ LazyIterable.prototype[ip.symbol] = function(){
     return regeneratorRuntime.wrap(function takeWhile$(context$3$0) {
       while (1) switch (context$3$0.prev = context$3$0.next) {
       case 0:
-        result = {};
+        result = gen.next();
       case 1:
         if (result.done) {
           context$3$0.next = 8;
@@ -488,7 +487,7 @@ LazyIterable.prototype[ip.symbol] = function(){
         }
 
         context$3$0.next = 4;
-        return 0;
+        return result.value;
       case 4:
         next = context$3$0.sent;
         if(next.done || p(next.value)){

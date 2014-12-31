@@ -23,7 +23,7 @@ dist:
 
 js: $(JS_TARGET).min.js
 
-build/index.js: index.js | build dist node_modules
+build/index.js: index.js lib/* | build dist node_modules
 	$(NPM_BIN)/browserify -s nextgen $< -o $@
 
 $(JS_TARGET).js: build/index.js
