@@ -1,6 +1,7 @@
 .git*
 test/
 build/
+dist/
 .travis.yml
 *.swp
 Makefile

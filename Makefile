@@ -1,29 +1,34 @@
 PROJECT:=nextgen
+NPM_BIN:=$(shell npm bin)
 
-JS_TARGET ?= build/$(PROJECT).js
+JS_TARGET ?= dist/$(PROJECT)
 
 .PHONY: all clean js test
 all: test js
 
 clean:
-	rm -rf build
+	rm -rf dist
 
 test: | node_modules
-	`npm bin`/6to5-node `npm bin`/tape test/*.js
+	$(NPM_BIN)/6to5-node $(NPM_BIN)/tape test/*.js
 
 node_modules:
 	npm install
 
-%.min.js: %.js | node_modules
-	`npm bin`/uglifyjs $< -o $@ -c -m
-
-%.gz: %
-	gzip -c9 $^ > $@
-
-js: $(JS_TARGET) $(JS_TARGET:.js=.min.js)
-
-$(JS_TARGET): $(PROJECT).js | build
-	`npm bin`/browserify -t 6to5ify $< > $@
-
 build:
 	mkdir -p build
+
+dist:
+	mkdir -p dist
+
+js: $(JS_TARGET).min.js
+
+build/index.js: index.js | build dist node_modules
+	$(NPM_BIN)/6to5 $< -o $@
+
+$(JS_TARGET).js: build/index.js
+	$(NPM_BIN)/browserify -s nextgen $< -o $@
+
+$(JS_TARGET).min.js: $(JS_TARGET).js
+	$(NPM_BIN)/uglifyjs $< -o $@ -c -m
+

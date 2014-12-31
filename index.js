@@ -1,12 +1,10 @@
 "use strict"
-import {iterator} from 'iterator-protocol'
-import compose from 'transduce-compose'
 
-export {compose}
+var iterator = require('iterator-protocol').iterator,
+    compose = require('transduce-compose'),
+    slice = [].slice
 
-var slice = Array.prototype.slice
-
-export function iterate(nextGen, genAppend, iter){
+function iterate(nextGen, genAppend, iter){
   var iterNext, genNext
   var gen = init(nextGen(genAppend()))
   iter = iterator(iter)
@@ -20,7 +18,7 @@ export function iterate(nextGen, genAppend, iter){
   return genNext.value
 }
 
-export function init(nextGen){
+function init(nextGen){
   if(nextGen){
     var gen = nextGen()
     gen.next()
@@ -28,14 +26,18 @@ export function init(nextGen){
   }
 }
 
-export function dispatch(gen){
+function dispatch(gen){
   return function(){
       var args = slice.call(arguments)
-      return (nextGen) => () => gen.apply(null, args.concat(init(nextGen)))
+      return function(nextGen){
+        return function(){
+          return gen.apply(null, args.concat(init(nextGen)))
+        }
+      }
   }
 }
 
-export var genArray = dispatch(arrayGen)()
+var genArray = dispatch(arrayGen)()
 function* arrayGen(){
   var arr = []
   while(true){
@@ -47,11 +49,11 @@ function* arrayGen(){
   }
 }
 
-export function toArray(nextGen, iter){
+function toArray(nextGen, iter){
   return iterate(nextGen, genArray, iter)
 }
 
-export var map = dispatch(mapGen)
+var map = dispatch(mapGen)
 function* mapGen(f, gen){
   var next, result = {}
   while(!result.done){
@@ -64,7 +66,7 @@ function* mapGen(f, gen){
   return result.value
 }
 
-export var filter = dispatch(filterGen)
+var filter = dispatch(filterGen)
 function* filterGen(p, gen){
   var next, result = {}
   while(!result.done){
@@ -76,7 +78,7 @@ function* filterGen(p, gen){
   return result.value
 }
 
-export var remove = dispatch(removeGen)
+var remove = dispatch(removeGen)
 function* removeGen(p, gen){
   return yield* filterGen(not(p), gen)
 }
@@ -87,7 +89,7 @@ function not(p){
   }
 }
 
-export var take = dispatch(takeGen)
+var take = dispatch(takeGen)
 function* takeGen(n, gen){
   var result = {}, i = 0
   while(!result.done){
@@ -99,7 +101,7 @@ function* takeGen(n, gen){
   return result.value
 }
 
-export var takeWhile = dispatch(takeWhileGen)
+var takeWhile = dispatch(takeWhileGen)
 function* takeWhileGen(p, gen){
   var next, result = {}
   while(!result.done){
@@ -113,7 +115,7 @@ function* takeWhileGen(p, gen){
   return result.value
 }
 
-export var drop = dispatch(dropGen)
+var drop = dispatch(dropGen)
 function* dropGen(n, gen){
   var result = {}, next, i = 0
   while(!result.done){
@@ -125,7 +127,7 @@ function* dropGen(n, gen){
   return result.value
 }
 
-export var dropWhile = dispatch(dropWhileGen)
+var dropWhile = dispatch(dropWhileGen)
 function* dropWhileGen(p, gen){
   var next, result = {}
   while(!result.done){
@@ -138,7 +140,7 @@ function* dropWhileGen(p, gen){
   return result.value
 }
 
-export var cat = dispatch(catGen)()
+var cat = dispatch(catGen)()
 function* catGen(gen){
   var next, iter, inext, result = {}
   while(!result.done){
@@ -157,11 +159,11 @@ function* catGen(gen){
   return result.value
 }
 
-export function mapcat(f){
+function mapcat(f){
   return compose(map(f), cat)
 }
 
-export var partitionAll = dispatch(partitionAllGen)
+var partitionAll = dispatch(partitionAllGen)
 function* partitionAllGen(n, gen){
   var result = {}, next, ins = []
   while(!result.done){
@@ -187,7 +189,7 @@ function* partitionAllGen(n, gen){
   return result.value
 }
 
-export var partitionBy = dispatch(partitionByGen)
+var partitionBy = dispatch(partitionByGen)
 function* partitionByGen(p, gen){
   var result = {}, next, ins, prev, curr
   while(!result.done){
@@ -215,4 +217,24 @@ function* partitionByGen(p, gen){
     result = gen.next({done: true})
   }
   return result.value
+}
+
+module.exports = {
+  compose: compose,
+  iterate: iterate,
+  toArray: toArray,
+  init: init,
+  dispatch: dispatch,
+  genArray: genArray,
+  map: map,
+  filter: filter,
+  remove: remove,
+  take: take,
+  takeWhile: takeWhile,
+  drop: drop,
+  dropWhile: dropWhile,
+  cat: cat,
+  mapcat: mapcat,
+  partitionAll: partitionAll,
+  partitionBy: partitionBy
 }
