@@ -1,37 +1,25 @@
 "use strict"
 
-var iterator = require('iterator-protocol').iterator,
+var ip = require('iterator-protocol'),
+    iterator = ip.iterator,
     compose = require('transduce-compose'),
     slice = [].slice
-
-function iterate(nextGen, genAppend, iter){
-  var iterNext, genNext
-  var gen = nextGen(genAppend())
-  gen.next()
-  iter = iterator(iter)
-  while(true){
-    iterNext = iter.next()
-    genNext = gen.next(iterNext)
-    if(iterNext.done || genNext.done){
-      break
-    }
-  }
-  return genNext.value
-}
 
 function dispatch(gen){
   return function(){
       var args = slice.call(arguments)
       return function(nextGen){
-        if(nextGen) nextGen.next()
+        if(nextGen === void 0 || Array.isArray(nextGen)){
+          nextGen = arrayGen(nextGen)
+        }
+        nextGen.next()
         return gen.apply(null, args.concat(nextGen))
       }
   }
 }
 
-var genArray = dispatch(arrayGen)()
-function* arrayGen(){
-  var arr = []
+function* arrayGen(arr){
+  arr = arr || []
   while(true){
     var next = yield 0
     if(next.done){
@@ -41,9 +29,6 @@ function* arrayGen(){
   }
 }
 
-function toArray(nextGen, iter){
-  return iterate(nextGen, genArray, iter)
-}
 
 var map = dispatch(mapGen)
 function* mapGen(f, gen){
@@ -211,12 +196,39 @@ function* partitionByGen(p, gen){
   return result.value
 }
 
+function toArray(nextGen, iter){
+  return ip.toArray(iterable(nextGen, iter))
+}
+
+function iterable(nextGen, iter) {
+  return new LazyIterable(nextGen, iter)
+}
+
+function LazyIterable(gen, iter){
+  this.gen = gen
+  this.iter = iter
+}
+LazyIterable.prototype[ip.symbol] = function(){
+  var iter = iterator(this.iter),
+      values = [],
+      result = {},
+      nextGen
+  nextGen = this.gen(values)
+  nextGen.next();
+  return {next: function(){
+    while(!result.done && !values.length){
+      result = nextGen.next(iter.next())
+    }
+    return !values.length ? result : {done: false, value: values.shift()}
+  }};
+}
+
+
 module.exports = {
   compose: compose,
-  iterate: iterate,
+  iterable: iterable,
   toArray: toArray,
   dispatch: dispatch,
-  genArray: genArray,
   map: map,
   filter: filter,
   remove: remove,

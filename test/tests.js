@@ -20,35 +20,19 @@ function identity(x){
   return x
 }
 
-test('genArray manual', function(t){
-  var gen = ng.genArray(), next
-  gen.next()
-  next = gen.next({done: false, value: 0})
-  t.strictEqual(false, next.done)
-  next = gen.next({done: false, value: 1})
-  t.strictEqual(false, next.done)
-  next = gen.next({done: false, value: 2})
-  t.strictEqual(false, next.done)
-  next = gen.next({done: true})
-  t.strictEqual(true, next.done)
-  t.deepEqual([0, 1, 2], next.value)
-  t.end()
-})
-
 test('map', function(t){
   var gen = ng.map(plus(1))
-  t.deepEqual(ng.iterate(gen, ng.genArray, [0, 1, 2]), [1, 2, 3])
+  t.deepEqual(ng.toArray(gen, [0, 1, 2]), [1, 2, 3])
   t.deepEqual(ng.toArray(gen, [0, 1, 2]), [1, 2, 3])
 
   gen = ng.compose(ng.map(plus(1)), ng.map(plus(2)))
-  t.deepEqual(ng.iterate(gen, ng.genArray, [0, 1, 2]), [3, 4, 5])
+  t.deepEqual(ng.toArray(gen, [0, 1, 2]), [3, 4, 5])
   t.deepEqual(ng.toArray(gen, [0, 1, 2]), [3, 4, 5])
   gen = ng.compose(ng.map(plus(1)), ng.map(plus(2)), ng.map(plus(3)))
-  t.deepEqual(ng.iterate(gen, ng.genArray, [0, 1, 2]), [6, 7, 8])
+  t.deepEqual(ng.toArray(gen, [0, 1, 2]), [6, 7, 8])
   t.deepEqual(ng.toArray(gen, [0, 1, 2]), [6, 7, 8])
 
   gen = ng.compose(ng.map(plus(1)), ng.compose(ng.map(plus(2)), ng.map(plus(3))))
-  t.deepEqual(ng.iterate(gen, ng.genArray, [0, 1, 2]), [6, 7, 8])
   t.deepEqual(ng.toArray(gen, [0, 1, 2]), [6, 7, 8])
   t.deepEqual(ng.toArray(ng.compose(gen, ng.take(3)), [0, 1, 2, 3, 4]), [6, 7, 8])
   t.end()
@@ -155,7 +139,7 @@ test('partitionBy', function(t){
 
 test('compose manual iterate', function(t){
   var nextGen = ng.compose(ng.map(plus(1)), ng.filter(isOdd), ng.map(plus(3)), ng.take(3))
-  var gen = nextGen(ng.genArray())
+  var gen = nextGen([])
   gen.next()
   var next = gen.next({done: false, value: 0})
   t.strictEqual(false, next.done)

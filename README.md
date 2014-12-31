@@ -8,7 +8,7 @@ Requires support for ES6 generators.  If using Node.js run with `node --harmony`
 ### Transducers
 This library is essentially an experimental implementation of transducers using ES6 generators and iterators. If you are not familiar with transducers, check out [Transducers Explained][1].
 
-Generator transducers are created by composing functions that accept a next generator and return a new generator. Each transformation accepts a next generator transformer to send optionally transformed arguments. The composed generator function accepts an appending terminal generator to accept and potentially aggregate the transformed items. If implementing new generators, it is convenient to use `dispatch` to create generator transducers from generator functions.
+Generator transducers are created by composing functions that accept a next generator and return a new generator. Each transformation accepts a next generator transformer to send optionally transformed arguments. The composed generator function accepts an appending terminal generator to accept and potentially aggregate the transformed items. If the appending generator generates into a specified array, or a new empty array if undefined. If implementing new generators, it is convenient to use `dispatch` to create generator transducers from generator functions.
 
 The object sent and returned by all composed generators are defined in terms of iteration objects with `{done: boolean, value: value}`.   A transducer reduction can be signaled by sending `{done: true}` to the next generator.
 
@@ -18,7 +18,7 @@ Relationship to transducers:
 - 2-arity step: Yield each item from the generator in a loop, send transformed arguments as iteration arguments to next generator. Break on `{done: true}` from either iteration yield or result of sending `next` to next generator.
 - 1-arity result: Perform action outside of generator loop if iteration is done, but next generator is still accepting values.
 
-The result accumulator is hidden as state within the final appending transformer.  The generator transducers carry more state than transducers based on reducing functions. This allows containing state within the final generator.  Note, that this could prevent some applications of transducers in stateless contexts.
+The result accumulator is hidden as state within the final appending transformer (which will be internal and generated into an array if not specified).  The generator transducers carry more state than transducers based on reducing functions. This allows containing state within the final generator.  Note, that this could prevent some applications of transducers in stateless contexts.
 
 More examples to come. For now, check out the source and tests for definition and use.
 
@@ -27,38 +27,32 @@ More examples to come. For now, check out the source and tests for definition an
 
 ```javascript
 // iteration
-iterate: function(xf, f, coll);
-toArray: function(xf?, coll);
+iterable: function(nextGen, iter)
+toArray: function(nextGen, iter)
 
 // util
-compose: function(/*fns*/);
-dispatch: function(gen); 
-
-// appending generators
-genArray: function();
+compose: function(/*fns*/)
+dispatch: function(gen)
 
 // generator transducers
-map: function(mappingFunction);
-filter: function(predicate);
-remove: function(predicate);
-take: function(n);
-takeWhile: function(predicate);
-drop: function(n);
-dropWhile: function(predicate);
+map: function(mappingFunction)
+filter: function(predicate)
+remove: function(predicate)
+take: function(n)
+takeWhile: function(predicate)
+drop: function(n)
+dropWhile: function(predicate)
 cat: transducer
-mapcat: function(f);
-partitionAll: function(n);
-partitionBy: function(f);
+mapcat: function(f)
+partitionAll: function(n)
+partitionBy: function(f)
 ```
 
-##### iterate(xf, f, coll)
-Iterates over a collection transforming with generator transducer `xf` and sending to appending generator `f`.
+##### iterable(nextGen, iter)
+Creates an ES6 iterable that iterates over a collection transforming with generator transducer `nextGen`. The iterator created from the iterable is lazy.
 
-##### toArray(xf, coll)
-Iterate a collection into an array with an optional transformation. Same as using `iterate` with `genArray` as `f`.
-
-##### genArray()
-An appending generator for iterating into arrays. Use as `f` in `iterate`.
+##### toArray(nextGen, iter)
+Generates an array from `iterable(nextGen, iter)`
 
 ##### dispatch(gen)
 Creates a generator transducer by dispatching to a generator function.  The result will be a function that can be called to provide initial arguments to the generator.  The last argument to the generator function will be an initialized next generator to send possibly transformed arguments. This generator will be provided by the library.  Initial arguments provided by calling `dispatched` function.  All generator transducers below are created with `dispatch`. See source and tests for examples usage.
