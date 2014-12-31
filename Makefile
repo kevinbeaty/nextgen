@@ -24,7 +24,7 @@ dist:
 js: $(JS_TARGET).min.js
 
 build/index.js: index.js | build dist node_modules
-	$(NPM_BIN)/regenerator --include-runtime $< > $@
+	$(NPM_BIN)/regenerator $< > $@
 
 $(JS_TARGET).js: build/index.js
 	$(NPM_BIN)/browserify -s nextgen $< -o $@

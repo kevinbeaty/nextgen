@@ -8,7 +8,7 @@ Requires support for ES6 generators.  If using Node.js run with `node --harmony`
 ### Transducers
 This library is essentially an experimental implementation of transducers using ES6 generators and iterators. If you are not familiar with transducers, check out [Transducers Explained][1].
 
-Generator transducers are created by composing functions that accept a next generator and return a 0-arity function that creates a new generator. Each transformation accepts a next generator transformer to send optionally transformed arguments. The composed generator function accepts an appending terminal generator to accept and potentially aggregate the transformed items. If implementing new generators, it is convenient to use `dispatch` to create generator transducers from generator functions.
+Generator transducers are created by composing functions that accept a next generator and return a new generator. Each transformation accepts a next generator transformer to send optionally transformed arguments. The composed generator function accepts an appending terminal generator to accept and potentially aggregate the transformed items. If implementing new generators, it is convenient to use `dispatch` to create generator transducers from generator functions.
 
 The object sent and returned by all composed generators are defined in terms of iteration objects with `{done: boolean, value: value}`.   A transducer reduction can be signaled by sending `{done: true}` to the next generator.
 
@@ -32,7 +32,6 @@ toArray: function(xf?, coll);
 
 // util
 compose: function(/*fns*/);
-init: function(gen);
 dispatch: function(gen); 
 
 // appending generators
@@ -60,9 +59,6 @@ Iterate a collection into an array with an optional transformation. Same as usin
 
 ##### genArray()
 An appending generator for iterating into arrays. Use as `f` in `iterate`.
-
-##### init(gen)
-Initializes a generator by calling generator function with no args and sending first `next`.
 
 ##### dispatch(gen)
 Creates a generator transducer by dispatching to a generator function.  The result will be a function that can be called to provide initial arguments to the generator.  The last argument to the generator function will be an initialized next generator to send possibly transformed arguments. This generator will be provided by the library.  Initial arguments provided by calling `dispatched` function.  All generator transducers below are created with `dispatch`. See source and tests for examples usage.

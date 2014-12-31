@@ -13,15 +13,16 @@ function isOdd(x){
 }
 
 function reverse(arr){
-  return arr.reverse();
+  return arr.reverse()
 }
 
 function identity(x){
-  return x;
+  return x
 }
 
 test('genArray manual', function(t){
-  var gen = ng.init(ng.genArray()), next
+  var gen = ng.genArray(), next
+  gen.next()
   next = gen.next({done: false, value: 0})
   t.strictEqual(false, next.done)
   next = gen.next({done: false, value: 1})
@@ -154,7 +155,8 @@ test('partitionBy', function(t){
 
 test('compose manual iterate', function(t){
   var nextGen = ng.compose(ng.map(plus(1)), ng.filter(isOdd), ng.map(plus(3)), ng.take(3))
-  var gen = ng.init(nextGen(ng.genArray()))
+  var gen = nextGen(ng.genArray())
+  gen.next()
   var next = gen.next({done: false, value: 0})
   t.strictEqual(false, next.done)
   next = gen.next({done: false, value: 1})

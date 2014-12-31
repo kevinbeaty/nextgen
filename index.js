@@ -6,7 +6,8 @@ var iterator = require('iterator-protocol').iterator,
 
 function iterate(nextGen, genAppend, iter){
   var iterNext, genNext
-  var gen = init(nextGen(genAppend()))
+  var gen = nextGen(genAppend())
+  gen.next()
   iter = iterator(iter)
   while(true){
     iterNext = iter.next()
@@ -18,21 +19,12 @@ function iterate(nextGen, genAppend, iter){
   return genNext.value
 }
 
-function init(nextGen){
-  if(nextGen){
-    var gen = nextGen()
-    gen.next()
-    return gen
-  }
-}
-
 function dispatch(gen){
   return function(){
       var args = slice.call(arguments)
       return function(nextGen){
-        return function(){
-          return gen.apply(null, args.concat(init(nextGen)))
-        }
+        if(nextGen) nextGen.next()
+        return gen.apply(null, args.concat(nextGen))
       }
   }
 }
@@ -223,7 +215,6 @@ module.exports = {
   compose: compose,
   iterate: iterate,
   toArray: toArray,
-  init: init,
   dispatch: dispatch,
   genArray: genArray,
   map: map,
