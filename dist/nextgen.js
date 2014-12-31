@@ -1,390 +1,121 @@
-!function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var n;"undefined"!=typeof window?n=window:"undefined"!=typeof global?n=global:"undefined"!=typeof self&&(n=self),n.nextgen=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
-"use strict";
+!function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var n;"undefined"!=typeof window?n=window:"undefined"!=typeof global?n=global:"undefined"!=typeof self&&(n=self),n.nextgen=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw (f.code="MODULE_NOT_FOUND", f)}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+'use strict'
+var compose = require('transduce-compose'),
+    dispatch = require('./lib/dispatch'),
+    map = dispatch(require('./lib/map')),
+    cat = dispatch(require('./lib/cat'))()
 
-var arrayGen = regeneratorRuntime.mark(function arrayGen(arr) {
-  var next;
+module.exports = {
+  compose: compose,
+  iterable: require('./lib/iterable'),
+  toArray: require('./lib/toArray'),
+  dispatch: dispatch,
+  map: map,
+  filter: dispatch(require('./lib/filter')),
+  remove: dispatch(require('./lib/remove')),
+  take: dispatch(require('./lib/take')),
+  takeWhile: dispatch(require('./lib/takeWhile')),
+  drop: dispatch(require('./lib/drop')),
+  dropWhile: dispatch(require('./lib/dropWhile')),
+  cat: cat,
+  mapcat: mapcat,
+  partitionAll: dispatch(require('./lib/partitionAll')),
+  partitionBy: dispatch(require('./lib/partitionBy'))
+}
 
-  return regeneratorRuntime.wrap(function arrayGen$(context$1$0) {
-    while (1) switch (context$1$0.prev = context$1$0.next) {
-    case 0:
-      arr = arr || [];
-    case 1:
-      if (!true) {
-        context$1$0.next = 10;
-        break;
-      }
+function mapcat(f){
+  return compose(map(f), cat)
+}
 
-      context$1$0.next = 4;
-      return 0;
-    case 4:
-      next = context$1$0.sent;
+},{"./lib/cat":3,"./lib/dispatch":4,"./lib/drop":5,"./lib/dropWhile":6,"./lib/filter":7,"./lib/iterable":8,"./lib/map":9,"./lib/partitionAll":10,"./lib/partitionBy":11,"./lib/remove":12,"./lib/take":13,"./lib/takeWhile":14,"./lib/toArray":15,"transduce-compose":18}],2:[function(require,module,exports){
+  'use strict';
 
-      if (!next.done) {
-        context$1$0.next = 7;
-        break;
-      }
+  var arrayGen = regeneratorRuntime.mark(function arrayGen(arr) {
+    var next;
 
-      return context$1$0.abrupt("return", arr);
-    case 7:
-      arr.push(next.value);
-      context$1$0.next = 1;
-      break;
-    case 10:
-    case "end":
-      return context$1$0.stop();
-    }
-  }, arrayGen, this);
-});
-
-var mapGen = regeneratorRuntime.mark(function mapGen(f, gen) {
-  var next, result;
-
-  return regeneratorRuntime.wrap(function mapGen$(context$1$0) {
-    while (1) switch (context$1$0.prev = context$1$0.next) {
-    case 0:
-      result = {};
-    case 1:
-      if (result.done) {
-        context$1$0.next = 9;
-        break;
-      }
-
-      context$1$0.next = 4;
-      return 0;
-    case 4:
-      next = context$1$0.sent;
-      if(!next.done){
-        next.value = f(next.value) 
-      }
-      result = gen.next(next);
-      context$1$0.next = 1;
-      break;
-    case 9:
-      return context$1$0.abrupt("return", result.value);
-    case 10:
-    case "end":
-      return context$1$0.stop();
-    }
-  }, mapGen, this);
-});
-
-var filterGen = regeneratorRuntime.mark(function filterGen(p, gen) {
-  var next, result;
-
-  return regeneratorRuntime.wrap(function filterGen$(context$1$0) {
-    while (1) switch (context$1$0.prev = context$1$0.next) {
-    case 0:
-      result = {};
-    case 1:
-      if (result.done) {
-        context$1$0.next = 8;
-        break;
-      }
-
-      context$1$0.next = 4;
-      return 0;
-    case 4:
-      next = context$1$0.sent;
-      if(next.done || p(next.value)){
-        result = gen.next(next)
-      }
-      context$1$0.next = 1;
-      break;
-    case 8:
-      return context$1$0.abrupt("return", result.value);
-    case 9:
-    case "end":
-      return context$1$0.stop();
-    }
-  }, filterGen, this);
-});
-
-var removeGen = regeneratorRuntime.mark(function removeGen(p, gen) {
-  return regeneratorRuntime.wrap(function removeGen$(context$1$0) {
-    while (1) switch (context$1$0.prev = context$1$0.next) {
-    case 0:
-      return context$1$0.delegateYield(filterGen(not(p), gen), "t0", 1);
-    case 1:
-      return context$1$0.abrupt("return", context$1$0.t0);
-    case 2:
-    case "end":
-      return context$1$0.stop();
-    }
-  }, removeGen, this);
-});
-
-var takeGen = regeneratorRuntime.mark(function takeGen(n, gen) {
-  var result, i;
-
-  return regeneratorRuntime.wrap(function takeGen$(context$1$0) {
-    while (1) switch (context$1$0.prev = context$1$0.next) {
-    case 0:
-      result = {}, i = 0;
-    case 1:
-      if (result.done) {
-        context$1$0.next = 9;
-        break;
-      }
-
-      context$1$0.next = 4;
-      return 0;
-    case 4:
-      context$1$0.t1 = context$1$0.sent;
-      result = gen.next(context$1$0.t1);
-      if(!result.done && ++i >= n){
-        result = gen.next({done: true})
-      }
-      context$1$0.next = 1;
-      break;
-    case 9:
-      return context$1$0.abrupt("return", result.value);
-    case 10:
-    case "end":
-      return context$1$0.stop();
-    }
-  }, takeGen, this);
-});
-
-var takeWhileGen = regeneratorRuntime.mark(function takeWhileGen(p, gen) {
-  var next, result;
-
-  return regeneratorRuntime.wrap(function takeWhileGen$(context$1$0) {
-    while (1) switch (context$1$0.prev = context$1$0.next) {
-    case 0:
-      result = {};
-    case 1:
-      if (result.done) {
-        context$1$0.next = 8;
-        break;
-      }
-
-      context$1$0.next = 4;
-      return 0;
-    case 4:
-      next = context$1$0.sent;
-      if(next.done || p(next.value)){
-        result = gen.next(next)
-      } else {
-        result = gen.next({done: true})
-      }
-      context$1$0.next = 1;
-      break;
-    case 8:
-      return context$1$0.abrupt("return", result.value);
-    case 9:
-    case "end":
-      return context$1$0.stop();
-    }
-  }, takeWhileGen, this);
-});
-
-var dropGen = regeneratorRuntime.mark(function dropGen(n, gen) {
-  var result, next, i;
-
-  return regeneratorRuntime.wrap(function dropGen$(context$1$0) {
-    while (1) switch (context$1$0.prev = context$1$0.next) {
-    case 0:
-      result = {}, i = 0;
-    case 1:
-      if (result.done) {
-        context$1$0.next = 8;
-        break;
-      }
-
-      context$1$0.next = 4;
-      return 0;
-    case 4:
-      next = context$1$0.sent;
-      if(next.done || i++ >= n){
-        result = gen.next(next)
-      }
-      context$1$0.next = 1;
-      break;
-    case 8:
-      return context$1$0.abrupt("return", result.value);
-    case 9:
-    case "end":
-      return context$1$0.stop();
-    }
-  }, dropGen, this);
-});
-
-var dropWhileGen = regeneratorRuntime.mark(function dropWhileGen(p, gen) {
-  var next, result;
-
-  return regeneratorRuntime.wrap(function dropWhileGen$(context$1$0) {
-    while (1) switch (context$1$0.prev = context$1$0.next) {
-    case 0:
-      result = {};
-    case 1:
-      if (result.done) {
-        context$1$0.next = 8;
-        break;
-      }
-
-      context$1$0.next = 4;
-      return 0;
-    case 4:
-      next = context$1$0.sent;
-      if(next.done || !(p && p(next.value))){
-        result = gen.next(next)
-        p = null
-      }
-      context$1$0.next = 1;
-      break;
-    case 8:
-      return context$1$0.abrupt("return", result.value);
-    case 9:
-    case "end":
-      return context$1$0.stop();
-    }
-  }, dropWhileGen, this);
-});
-
-var catGen = regeneratorRuntime.mark(function catGen(gen) {
-  var next, iter, inext, result;
-
-  return regeneratorRuntime.wrap(function catGen$(context$1$0) {
-    while (1) switch (context$1$0.prev = context$1$0.next) {
-    case 0:
-      result = {};
-    case 1:
-      if (result.done) {
-        context$1$0.next = 8;
-        break;
-      }
-
-      context$1$0.next = 4;
-      return 0;
-    case 4:
-      next = context$1$0.sent;
-      if(next.done){
-        result = gen.next(next)
-      } else {
-        iter = iterator(next.value)
-        inext = iter.next()
-        while(!inext.done && !result.done){
-          result = gen.next(inext)
-          inext = iter.next()
+    return regeneratorRuntime.wrap(function arrayGen$(context$3$0) {
+      while (1) switch (context$3$0.prev = context$3$0.next) {
+      case 0:
+        arr = arr || [];
+      case 1:
+        if (!true) {
+          context$3$0.next = 10;
+          break;
         }
-      }
-      context$1$0.next = 1;
-      break;
-    case 8:
-      return context$1$0.abrupt("return", result.value);
-    case 9:
-    case "end":
-      return context$1$0.stop();
-    }
-  }, catGen, this);
-});
 
-var partitionAllGen = regeneratorRuntime.mark(function partitionAllGen(n, gen) {
-  var result, next, ins;
+        context$3$0.next = 4;
+        return 0;
+      case 4:
+        next = context$3$0.sent;
 
-  return regeneratorRuntime.wrap(function partitionAllGen$(context$1$0) {
-    while (1) switch (context$1$0.prev = context$1$0.next) {
-    case 0:
-      result = {}, ins = [];
-    case 1:
-      if (result.done) {
-        context$1$0.next = 11;
+        if (!next.done) {
+          context$3$0.next = 7;
+          break;
+        }
+
+        return context$3$0.abrupt("return", arr);
+      case 7:
+        arr.push(next.value);
+        context$3$0.next = 1;
         break;
+      case 10:
+      case "end":
+        return context$3$0.stop();
       }
+    }, arrayGen, this);
+  });
 
-      context$1$0.next = 4;
-      return 0;
-    case 4:
-      next = context$1$0.sent;
+  module.exports = arrayGen;
+},{}],3:[function(require,module,exports){
+  'use strict';
 
-      if (!next.done) {
-        context$1$0.next = 7;
+  var cat = regeneratorRuntime.mark(function cat(gen) {
+    var next, iter, inext, result;
+
+    return regeneratorRuntime.wrap(function cat$(context$3$0) {
+      while (1) switch (context$3$0.prev = context$3$0.next) {
+      case 0:
+        result = {};
+      case 1:
+        if (result.done) {
+          context$3$0.next = 8;
+          break;
+        }
+
+        context$3$0.next = 4;
+        return 0;
+      case 4:
+        next = context$3$0.sent;
+        if(next.done){
+          result = gen.next(next)
+        } else {
+          iter = iterator(next.value)
+          inext = iter.next()
+          while(!inext.done && !result.done){
+            result = gen.next(inext)
+            inext = iter.next()
+          }
+        }
+        context$3$0.next = 1;
         break;
+      case 8:
+        return context$3$0.abrupt("return", result.value);
+      case 9:
+      case "end":
+        return context$3$0.stop();
       }
+    }, cat, this);
+  });
 
-      return context$1$0.abrupt("break", 11);
-    case 7:
-      ins.push(next.value);
-      if(n === ins.length){
-        result = gen.next({done: false, value: ins})
-        ins = []
-      }
-      context$1$0.next = 1;
-      break;
-    case 11:
-      if(!result.done && ins.length){
-        result = gen.next({done: false, value: ins})
-      }
+  var iterator = require('iterator-protocol').iterator;
 
-      if(!result.done){
-        result = gen.next({done: true})
-      }
-      return context$1$0.abrupt("return", result.value);
-    case 14:
-    case "end":
-      return context$1$0.stop();
-    }
-  }, partitionAllGen, this);
-});
+  module.exports = cat;
+},{"iterator-protocol":16}],4:[function(require,module,exports){
+'use strict'
+var arrayGen = require('./arrayGen'),
+    slice = [].slice
 
-var partitionByGen = regeneratorRuntime.mark(function partitionByGen(p, gen) {
-  var result, next, ins, prev, curr;
-
-  return regeneratorRuntime.wrap(function partitionByGen$(context$1$0) {
-    while (1) switch (context$1$0.prev = context$1$0.next) {
-    case 0:
-      result = {};
-    case 1:
-      if (result.done) {
-        context$1$0.next = 12;
-        break;
-      }
-
-      prev = curr;
-      context$1$0.next = 5;
-      return 0;
-    case 5:
-      next = context$1$0.sent;
-
-      if (!next.done) {
-        context$1$0.next = 8;
-        break;
-      }
-
-      return context$1$0.abrupt("break", 12);
-    case 8:
-      curr = p(next.value);
-      if(ins === void 0){
-        ins = [next.value]
-      } else if(prev === curr){
-        ins.push(next.value)
-      } else {
-        result = gen.next({done: false, value: ins})
-        ins = [next.value]
-      }
-      context$1$0.next = 1;
-      break;
-    case 12:
-      if(!result.done && ins.length){
-        result = gen.next({done: false, value: ins})
-      }
-
-      if(!result.done){
-        result = gen.next({done: true})
-      }
-      return context$1$0.abrupt("return", result.value);
-    case 15:
-    case "end":
-      return context$1$0.stop();
-    }
-  }, partitionByGen, this);
-});
-
-var ip = require('iterator-protocol'),
-    iterator = ip.iterator,
-    compose = require('transduce-compose'),
-    slice = [].slice;
-
+module.exports = dispatch
 function dispatch(gen){
   return function(){
       var args = slice.call(arguments)
@@ -398,41 +129,118 @@ function dispatch(gen){
   }
 }
 
+},{"./arrayGen":2}],5:[function(require,module,exports){
+  'use strict';
 
-var map = dispatch(mapGen);
+  var drop = regeneratorRuntime.mark(function drop(n, gen) {
+    var result, next, i;
 
-var filter = dispatch(filterGen);
+    return regeneratorRuntime.wrap(function drop$(context$3$0) {
+      while (1) switch (context$3$0.prev = context$3$0.next) {
+      case 0:
+        result = {}, i = 0;
+      case 1:
+        if (result.done) {
+          context$3$0.next = 8;
+          break;
+        }
 
-var remove = dispatch(removeGen);
+        context$3$0.next = 4;
+        return 0;
+      case 4:
+        next = context$3$0.sent;
+        if(next.done || i++ >= n){
+          result = gen.next(next)
+        }
+        context$3$0.next = 1;
+        break;
+      case 8:
+        return context$3$0.abrupt("return", result.value);
+      case 9:
+      case "end":
+        return context$3$0.stop();
+      }
+    }, drop, this);
+  });
 
-function not(p){
-  return function(val){
-    return !p(val)
-  }
-}
+  module.exports = drop;
+},{}],6:[function(require,module,exports){
+  'use strict';
 
-var take = dispatch(takeGen);
+  var dropWhile = regeneratorRuntime.mark(function dropWhile(p, gen) {
+    var next, result;
 
-var takeWhile = dispatch(takeWhileGen);
+    return regeneratorRuntime.wrap(function dropWhile$(context$3$0) {
+      while (1) switch (context$3$0.prev = context$3$0.next) {
+      case 0:
+        result = {};
+      case 1:
+        if (result.done) {
+          context$3$0.next = 8;
+          break;
+        }
 
-var drop = dispatch(dropGen);
+        context$3$0.next = 4;
+        return 0;
+      case 4:
+        next = context$3$0.sent;
+        if(next.done || !(p && p(next.value))){
+          result = gen.next(next)
+          p = null
+        }
+        context$3$0.next = 1;
+        break;
+      case 8:
+        return context$3$0.abrupt("return", result.value);
+      case 9:
+      case "end":
+        return context$3$0.stop();
+      }
+    }, dropWhile, this);
+  });
 
-var dropWhile = dispatch(dropWhileGen);
+  module.exports = dropWhile;
+},{}],7:[function(require,module,exports){
+  'use strict';
 
-var cat = dispatch(catGen)();
+  var filter = regeneratorRuntime.mark(function filter(p, gen) {
+    var next, result;
 
-function mapcat(f){
-  return compose(map(f), cat)
-}
+    return regeneratorRuntime.wrap(function filter$(context$3$0) {
+      while (1) switch (context$3$0.prev = context$3$0.next) {
+      case 0:
+        result = {};
+      case 1:
+        if (result.done) {
+          context$3$0.next = 8;
+          break;
+        }
 
-var partitionAll = dispatch(partitionAllGen);
+        context$3$0.next = 4;
+        return 0;
+      case 4:
+        next = context$3$0.sent;
+        if(next.done || p(next.value)){
+          result = gen.next(next)
+        }
+        context$3$0.next = 1;
+        break;
+      case 8:
+        return context$3$0.abrupt("return", result.value);
+      case 9:
+      case "end":
+        return context$3$0.stop();
+      }
+    }, filter, this);
+  });
 
-var partitionBy = dispatch(partitionByGen);
+  module.exports = filter;
+},{}],8:[function(require,module,exports){
+'use strict'
+var ip = require('iterator-protocol'),
+    iterator = ip.iterator
 
-function toArray(nextGen, iter){
-  return ip.toArray(iterable(nextGen, iter))
-}
-
+module.exports = iterable
 function iterable(nextGen, iter) {
   return new LazyIterable(nextGen, iter)
 }
@@ -456,26 +264,261 @@ LazyIterable.prototype[ip.symbol] = function(){
   }};
 }
 
+},{"iterator-protocol":16}],9:[function(require,module,exports){
+  'use strict';
 
-module.exports = {
-  compose: compose,
-  iterable: iterable,
-  toArray: toArray,
-  dispatch: dispatch,
-  map: map,
-  filter: filter,
-  remove: remove,
-  take: take,
-  takeWhile: takeWhile,
-  drop: drop,
-  dropWhile: dropWhile,
-  cat: cat,
-  mapcat: mapcat,
-  partitionAll: partitionAll,
-  partitionBy: partitionBy
+  var map = regeneratorRuntime.mark(function map(f, gen) {
+    var next, result;
+
+    return regeneratorRuntime.wrap(function map$(context$3$0) {
+      while (1) switch (context$3$0.prev = context$3$0.next) {
+      case 0:
+        result = {};
+      case 1:
+        if (result.done) {
+          context$3$0.next = 9;
+          break;
+        }
+
+        context$3$0.next = 4;
+        return 0;
+      case 4:
+        next = context$3$0.sent;
+        if(!next.done){
+          next.value = f(next.value) 
+        }
+        result = gen.next(next);
+        context$3$0.next = 1;
+        break;
+      case 9:
+        return context$3$0.abrupt("return", result.value);
+      case 10:
+      case "end":
+        return context$3$0.stop();
+      }
+    }, map, this);
+  });
+
+  module.exports = map;
+},{}],10:[function(require,module,exports){
+  'use strict';
+
+  var partitionAll = regeneratorRuntime.mark(function partitionAll(n, gen) {
+    var result, next, ins;
+
+    return regeneratorRuntime.wrap(function partitionAll$(context$3$0) {
+      while (1) switch (context$3$0.prev = context$3$0.next) {
+      case 0:
+        result = {}, ins = [];
+      case 1:
+        if (result.done) {
+          context$3$0.next = 11;
+          break;
+        }
+
+        context$3$0.next = 4;
+        return 0;
+      case 4:
+        next = context$3$0.sent;
+
+        if (!next.done) {
+          context$3$0.next = 7;
+          break;
+        }
+
+        return context$3$0.abrupt("break", 11);
+      case 7:
+        ins.push(next.value);
+        if(n === ins.length){
+          result = gen.next({done: false, value: ins})
+          ins = []
+        }
+        context$3$0.next = 1;
+        break;
+      case 11:
+        if(!result.done && ins.length){
+          result = gen.next({done: false, value: ins})
+        }
+
+        if(!result.done){
+          result = gen.next({done: true})
+        }
+        return context$3$0.abrupt("return", result.value);
+      case 14:
+      case "end":
+        return context$3$0.stop();
+      }
+    }, partitionAll, this);
+  });
+
+  module.exports = partitionAll;
+},{}],11:[function(require,module,exports){
+  'use strict';
+
+  var partitionBy = regeneratorRuntime.mark(function partitionBy(p, gen) {
+    var result, next, ins, prev, curr;
+
+    return regeneratorRuntime.wrap(function partitionBy$(context$3$0) {
+      while (1) switch (context$3$0.prev = context$3$0.next) {
+      case 0:
+        result = {};
+      case 1:
+        if (result.done) {
+          context$3$0.next = 12;
+          break;
+        }
+
+        prev = curr;
+        context$3$0.next = 5;
+        return 0;
+      case 5:
+        next = context$3$0.sent;
+
+        if (!next.done) {
+          context$3$0.next = 8;
+          break;
+        }
+
+        return context$3$0.abrupt("break", 12);
+      case 8:
+        curr = p(next.value);
+        if(ins === void 0){
+          ins = [next.value]
+        } else if(prev === curr){
+          ins.push(next.value)
+        } else {
+          result = gen.next({done: false, value: ins})
+          ins = [next.value]
+        }
+        context$3$0.next = 1;
+        break;
+      case 12:
+        if(!result.done && ins.length){
+          result = gen.next({done: false, value: ins})
+        }
+
+        if(!result.done){
+          result = gen.next({done: true})
+        }
+        return context$3$0.abrupt("return", result.value);
+      case 15:
+      case "end":
+        return context$3$0.stop();
+      }
+    }, partitionBy, this);
+  });
+
+  module.exports = partitionBy;
+},{}],12:[function(require,module,exports){
+  'use strict';
+
+  var remove = regeneratorRuntime.mark(function remove(p, gen) {
+    return regeneratorRuntime.wrap(function remove$(context$3$0) {
+      while (1) switch (context$3$0.prev = context$3$0.next) {
+      case 0:
+        return context$3$0.delegateYield(filter(not(p), gen), "t0", 1);
+      case 1:
+        return context$3$0.abrupt("return", context$3$0.t0);
+      case 2:
+      case "end":
+        return context$3$0.stop();
+      }
+    }, remove, this);
+  });
+
+  var filter = require('./filter');
+
+  module.exports = remove;
+
+  function not(p){
+    return function(val){
+      return !p(val)
+    }
+  }
+},{"./filter":7}],13:[function(require,module,exports){
+  'use strict';
+
+  var take = regeneratorRuntime.mark(function take(n, gen) {
+    var result, i;
+
+    return regeneratorRuntime.wrap(function take$(context$3$0) {
+      while (1) switch (context$3$0.prev = context$3$0.next) {
+      case 0:
+        result = {}, i = 0;
+      case 1:
+        if (result.done) {
+          context$3$0.next = 9;
+          break;
+        }
+
+        context$3$0.next = 4;
+        return 0;
+      case 4:
+        context$3$0.t1 = context$3$0.sent;
+        result = gen.next(context$3$0.t1);
+        if(!result.done && ++i >= n){
+          result = gen.next({done: true})
+        }
+        context$3$0.next = 1;
+        break;
+      case 9:
+        return context$3$0.abrupt("return", result.value);
+      case 10:
+      case "end":
+        return context$3$0.stop();
+      }
+    }, take, this);
+  });
+
+  module.exports = take;
+},{}],14:[function(require,module,exports){
+  'use strict';
+
+  var takeWhile = regeneratorRuntime.mark(function takeWhile(p, gen) {
+    var next, result;
+
+    return regeneratorRuntime.wrap(function takeWhile$(context$3$0) {
+      while (1) switch (context$3$0.prev = context$3$0.next) {
+      case 0:
+        result = {};
+      case 1:
+        if (result.done) {
+          context$3$0.next = 8;
+          break;
+        }
+
+        context$3$0.next = 4;
+        return 0;
+      case 4:
+        next = context$3$0.sent;
+        if(next.done || p(next.value)){
+          result = gen.next(next)
+        } else {
+          result = gen.next({done: true})
+        }
+        context$3$0.next = 1;
+        break;
+      case 8:
+        return context$3$0.abrupt("return", result.value);
+      case 9:
+      case "end":
+        return context$3$0.stop();
+      }
+    }, takeWhile, this);
+  });
+
+  module.exports = takeWhile;
+},{}],15:[function(require,module,exports){
+'use strict'
+var ip = require('iterator-protocol'),
+    iterable = require('./iterable')
+
+module.exports = toArray
+function toArray(nextGen, iter){
+  return ip.toArray(iterable(nextGen, iter))
 }
 
-},{"iterator-protocol":2,"transduce-compose":4}],2:[function(require,module,exports){
+},{"./iterable":8,"iterator-protocol":16}],16:[function(require,module,exports){
 "use strict";
 /* global Symbol */
 var util = require('transduce-util'),
@@ -599,7 +642,7 @@ function _keys(obj){
   return keys;
 }
 
-},{"transduce-util":3}],3:[function(require,module,exports){
+},{"transduce-util":17}],17:[function(require,module,exports){
 "use strict";
 var undef,
     Arr = Array,
@@ -671,7 +714,7 @@ function append(result, input){
   return result + input;
 }
 
-},{}],4:[function(require,module,exports){
+},{}],18:[function(require,module,exports){
 "use strict";
 module.exports = compose;
 function compose(){

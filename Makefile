@@ -24,10 +24,10 @@ dist:
 js: $(JS_TARGET).min.js
 
 build/index.js: index.js | build dist node_modules
-	$(NPM_BIN)/regenerator $< > $@
+	$(NPM_BIN)/browserify -s nextgen $< -o $@
 
 $(JS_TARGET).js: build/index.js
-	$(NPM_BIN)/browserify -s nextgen $< -o $@
+	$(NPM_BIN)/regenerator $< > $@
 
 $(JS_TARGET).min.js: $(JS_TARGET).js
 	$(NPM_BIN)/uglifyjs $< -o $@ -c -m
