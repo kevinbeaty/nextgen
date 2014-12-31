@@ -2,8 +2,7 @@
 import ng from '../'
 import test from 'tape'
 
-var slice = Array.prototype.slice,
-    plus = (x) => (y) => x+y,
+var plus = (x) => (y) => x+y,
     isOdd = (x) => x % 2 === 1,
     reverse = (arr) => arr.reverse(),
     identity = (x) => x
