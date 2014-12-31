@@ -7,10 +7,10 @@ JS_TARGET ?= dist/$(PROJECT)
 all: test js
 
 clean:
-	rm -rf dist
+	rm -rf build dist
 
 test: | node_modules
-	$(NPM_BIN)/6to5-node $(NPM_BIN)/tape test/*.js
+	node --harmony $(NPM_BIN)/tape test/*.js
 
 node_modules:
 	npm install
@@ -24,7 +24,7 @@ dist:
 js: $(JS_TARGET).min.js
 
 build/index.js: index.js | build dist node_modules
-	$(NPM_BIN)/6to5 $< -o $@
+	$(NPM_BIN)/regenerator --include-runtime $< > $@
 
 $(JS_TARGET).js: build/index.js
 	$(NPM_BIN)/browserify -s nextgen $< -o $@

@@ -2,12 +2,25 @@
 var ng = require('../'),
     test = require('tape')
 
-var plus = x => y => x+y,
-    isOdd = x => x % 2 === 1,
-    reverse = arr => arr.reverse(),
-    identity = x => x
+function plus(x){
+  return function(y){
+    return x+y
+  }
+}
 
-test('genArray manual', t => {
+function isOdd(x){
+  return x % 2 === 1
+}
+
+function reverse(arr){
+  return arr.reverse();
+}
+
+function identity(x){
+  return x;
+}
+
+test('genArray manual', function(t){
   var gen = ng.init(ng.genArray()), next
   next = gen.next({done: false, value: 0})
   t.strictEqual(false, next.done)
@@ -21,7 +34,7 @@ test('genArray manual', t => {
   t.end()
 })
 
-test('map', t => {
+test('map', function(t){
   var gen = ng.map(plus(1))
   t.deepEqual(ng.iterate(gen, ng.genArray, [0, 1, 2]), [1, 2, 3])
   t.deepEqual(ng.toArray(gen, [0, 1, 2]), [1, 2, 3])
@@ -40,7 +53,7 @@ test('map', t => {
   t.end()
 })
 
-test('filter', t => {
+test('filter', function(t){
   var gen = ng.filter(isOdd)
   t.deepEqual(ng.toArray(gen, [0, 1, 2, 3]), [1, 3])
   t.deepEqual(ng.toArray(gen, [0, 1, 2, 3, 4]), [1, 3])
@@ -51,7 +64,7 @@ test('filter', t => {
   t.end()
 })
 
-test('remove', t => {
+test('remove', function(t){
   var gen = ng.remove(isOdd)
   t.deepEqual(ng.toArray(gen, [0, 1, 2, 3]), [0, 2])
   t.deepEqual(ng.toArray(gen, [0, 1, 2, 3, 4]), [0, 2, 4])
@@ -62,7 +75,7 @@ test('remove', t => {
   t.end()
 })
 
-test('take', t => {
+test('take', function(t){
   var gen = ng.take(3)
   t.deepEqual(ng.toArray(gen, [0, 1, 2, 3]), [0, 1, 2])
   t.deepEqual(ng.toArray(gen, [0, 1, 2]), [0, 1, 2])
@@ -72,7 +85,7 @@ test('take', t => {
   t.end()
 })
 
-test('takeWhile', t => {
+test('takeWhile', function(t){
   var gen = ng.takeWhile(isOdd)
   t.deepEqual(ng.toArray(gen, [1, 3, 5, 2, 3]), [1, 3, 5])
   t.deepEqual(ng.toArray(gen, [1, 3, 5]), [1, 3, 5])
@@ -80,7 +93,7 @@ test('takeWhile', t => {
   t.end()
 })
 
-test('drop', t => {
+test('drop', function(t){
   var gen = ng.drop(3)
   t.deepEqual(ng.toArray(gen, [0, 1, 2, 3, 4]), [3, 4])
   t.deepEqual(ng.toArray(gen, [0, 1, 2, 3]), [3])
@@ -91,7 +104,7 @@ test('drop', t => {
   t.end()
 })
 
-test('dropWhile', t => {
+test('dropWhile', function(t){
   var gen = ng.dropWhile(isOdd)
   t.deepEqual(ng.toArray(gen, [1, 3, 5, 2, 3]), [2, 3])
   t.deepEqual(ng.toArray(gen, [1, 3, 5]), [])
@@ -99,7 +112,7 @@ test('dropWhile', t => {
   t.end()
 })
 
-test('cat', t => {
+test('cat', function(t){
   var gen = ng.cat
   t.deepEqual(ng.toArray(gen, [[0], [], [1, 2], [3]]), [0, 1, 2, 3])
   gen = ng.compose(ng.cat, ng.take(2))
@@ -109,7 +122,7 @@ test('cat', t => {
   t.end()
 })
 
-test('mapcat', t => {
+test('mapcat', function(t){
   var gen = ng.mapcat(reverse)
   t.deepEqual(ng.toArray(gen, [[0, 1, 2], [], [1, 2], [3]]), [2, 1, 0, 2, 1, 3])
   gen = ng.compose(ng.mapcat(reverse), ng.take(2))
@@ -117,7 +130,7 @@ test('mapcat', t => {
   t.end()
 })
 
-test('partitionAll', t => {
+test('partitionAll', function(t){
   var gen = ng.partitionAll(2)
   var result = ng.toArray(gen, [0,1,2,3,4,5,6,7,8,9])
   t.deepEqual(result, [[0,1],[2,3],[4,5],[6,7],[8,9]])
@@ -129,7 +142,7 @@ test('partitionAll', t => {
   t.end()
 })
 
-test('partitionBy', t => {
+test('partitionBy', function(t){
   var gen = ng.partitionBy(isOdd)
   var result = ng.toArray(gen, [0,1,1,3,4,6,8,7,7,8])
   t.deepEqual(result, [[0], [1,1,3], [4,6,8], [7,7], [8]])
@@ -139,7 +152,7 @@ test('partitionBy', t => {
   t.end()
 })
 
-test('compose manual iterate', t => {
+test('compose manual iterate', function(t){
   var nextGen = ng.compose(ng.map(plus(1)), ng.filter(isOdd), ng.map(plus(3)), ng.take(3))
   var gen = ng.init(nextGen(ng.genArray()))
   var next = gen.next({done: false, value: 0})
