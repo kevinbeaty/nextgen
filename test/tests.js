@@ -139,6 +139,9 @@ test('partitionBy', function(t){
 
 test('compose manual iterate', function(t){
   var nextGen = ng.compose(ng.map(plus(1)), ng.filter(isOdd), ng.map(plus(3)), ng.take(3))
+  var arr = ng.toArray(nextGen, [0, 1, 2, 3, 4])
+  t.deepEqual(arr, [4, 6, 8]);
+
   var gen = nextGen([])
   gen.next()
 
@@ -154,10 +157,8 @@ test('compose manual iterate', function(t){
   next = gen.next({done: false, value: 3})
   t.deepEqual(next, {done: false, value: [4, 6]})
 
-  t.strictEqual(false, next.done)
   next = gen.next({done: false, value: 4})
   t.deepEqual(next, {done: true, value: [4, 6, 8]})
 
-  t.deepEqual([4, 6, 8], next.value)
   t.end()
 })

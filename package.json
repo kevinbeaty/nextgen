@@ -1,6 +1,6 @@
 {
   "name": "nextgen",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Composable ES6 Generator Transformations",
   "main": "index.js",
   "scripts": {

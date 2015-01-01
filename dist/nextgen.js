@@ -27,7 +27,7 @@ function mapcat(f){
   return compose(map(f), cat)
 }
 
-},{"./lib/cat":3,"./lib/dispatch":4,"./lib/drop":5,"./lib/dropWhile":6,"./lib/filter":7,"./lib/iterable":8,"./lib/map":9,"./lib/partitionAll":10,"./lib/partitionBy":11,"./lib/remove":12,"./lib/take":13,"./lib/takeWhile":14,"./lib/toArray":15,"transduce-compose":18}],2:[function(require,module,exports){
+},{"./lib/cat":3,"./lib/dispatch":4,"./lib/drop":5,"./lib/dropWhile":6,"./lib/filter":7,"./lib/iterable":8,"./lib/map":9,"./lib/partitionAll":10,"./lib/partitionBy":11,"./lib/remove":12,"./lib/take":13,"./lib/takeWhile":14,"./lib/toArray":15,"transduce-compose":19}],2:[function(require,module,exports){
   'use strict';
 
   var arrayGen = regeneratorRuntime.mark(function arrayGen(arr) {
@@ -110,7 +110,7 @@ function mapcat(f){
   var iterator = require('iterator-protocol').iterator;
 
   module.exports = cat;
-},{"iterator-protocol":16}],4:[function(require,module,exports){
+},{"iterator-protocol":17}],4:[function(require,module,exports){
 'use strict'
 var arrayGen = require('./arrayGen'),
     slice = [].slice
@@ -118,13 +118,13 @@ var arrayGen = require('./arrayGen'),
 module.exports = dispatch
 function dispatch(gen){
   return function(){
-      var args = slice.call(arguments)
-      return function(nextGen){
-        if(nextGen === void 0 || Array.isArray(nextGen)){
-          nextGen = arrayGen(nextGen)
-        }
-        return gen.apply(null, args.concat(nextGen))
+    var args = slice.call(arguments)
+    return function(nextGen){
+      if(nextGen === void 0 || Array.isArray(nextGen)){
+        nextGen = arrayGen(nextGen)
       }
+      return gen.apply(null, args.concat(nextGen))
+    }
   }
 }
 
@@ -237,7 +237,8 @@ function dispatch(gen){
 },{}],8:[function(require,module,exports){
 'use strict'
 var ip = require('iterator-protocol'),
-    iterator = ip.iterator
+    iterator = ip.iterator,
+    value = require('./value')
 
 module.exports = iterable
 function iterable(nextGen, iter) {
@@ -250,20 +251,21 @@ function LazyIterable(gen, iter){
 }
 LazyIterable.prototype[ip.symbol] = function(){
   var iter = iterator(this.iter),
-      values = [],
-      result = {},
-      nextGen
-  nextGen = this.gen(values)
-  nextGen.next();
+      nextGen = this.gen([]),
+      result = nextGen.next()
   return {next: function(){
-    while(!result.done && !values.length){
+    while(!result.value.length && !result.done){
       result = nextGen.next(iter.next())
     }
-    return !values.length ? result : {done: false, value: values.shift()}
-  }};
+    return !result.value.length ? result : value.map(shift, result)
+  }}
 }
 
-},{"iterator-protocol":16}],9:[function(require,module,exports){
+function shift(value){
+  return value.shift()
+}
+
+},{"./value":16,"iterator-protocol":17}],9:[function(require,module,exports){
   'use strict';
 
   var map = regeneratorRuntime.mark(function map(f, gen) {
@@ -284,7 +286,7 @@ LazyIterable.prototype[ip.symbol] = function(){
       case 4:
         next = context$3$0.sent;
         if(!next.done){
-          next.value = f(next.value) 
+          next = value.map(f, next)
         }
         result = gen.next(next);
         context$3$0.next = 1;
@@ -298,8 +300,10 @@ LazyIterable.prototype[ip.symbol] = function(){
     }, map, this);
   });
 
+  var value = require('./value');
+
   module.exports = map;
-},{}],10:[function(require,module,exports){
+},{"./value":16}],10:[function(require,module,exports){
   'use strict';
 
   var partitionAll = regeneratorRuntime.mark(function partitionAll(n, gen) {
@@ -329,18 +333,18 @@ LazyIterable.prototype[ip.symbol] = function(){
       case 7:
         ins.push(next.value);
         if(n === ins.length){
-          result = gen.next({done: false, value: ins})
+          result = gen.next(value.of(ins))
           ins = []
         }
         context$3$0.next = 1;
         break;
       case 11:
         if(!result.done && ins.length){
-          result = gen.next({done: false, value: ins})
+          result = gen.next(value.of(ins))
         }
 
         if(!result.done){
-          result = gen.next({done: true})
+          result = gen.next(value.done())
         }
         return context$3$0.abrupt("return", result.value);
       case 14:
@@ -350,8 +354,10 @@ LazyIterable.prototype[ip.symbol] = function(){
     }, partitionAll, this);
   });
 
+  var value = require('./value');
+
   module.exports = partitionAll;
-},{}],11:[function(require,module,exports){
+},{"./value":16}],11:[function(require,module,exports){
   'use strict';
 
   var partitionBy = regeneratorRuntime.mark(function partitionBy(p, gen) {
@@ -386,18 +392,18 @@ LazyIterable.prototype[ip.symbol] = function(){
         } else if(prev === curr){
           ins.push(next.value)
         } else {
-          result = gen.next({done: false, value: ins})
+          result = gen.next(value.of(ins))
           ins = [next.value]
         }
         context$3$0.next = 1;
         break;
       case 12:
         if(!result.done && ins.length){
-          result = gen.next({done: false, value: ins})
+          result = gen.next(value.of(ins))
         }
 
         if(!result.done){
-          result = gen.next({done: true})
+          result = gen.next(value.done())
         }
         return context$3$0.abrupt("return", result.value);
       case 15:
@@ -407,8 +413,10 @@ LazyIterable.prototype[ip.symbol] = function(){
     }, partitionBy, this);
   });
 
+  var value = require('./value');
+
   module.exports = partitionBy;
-},{}],12:[function(require,module,exports){
+},{"./value":16}],12:[function(require,module,exports){
   'use strict';
 
   var remove = regeneratorRuntime.mark(function remove(p, gen) {
@@ -517,7 +525,28 @@ function toArray(nextGen, iter){
   return ip.toArray(iterable(nextGen, iter))
 }
 
-},{"./iterable":8,"iterator-protocol":16}],16:[function(require,module,exports){
+},{"./iterable":8,"iterator-protocol":17}],16:[function(require,module,exports){
+'use strict'
+
+module.exports = {
+  of: of,
+  map: map,
+  done: done
+}
+
+function map(f, result){
+  return of(f(result.value))
+}
+
+function of(value){
+  return {done: false, value: value}
+}
+
+function done(value){
+  return {done: true, value: value}
+}
+
+},{}],17:[function(require,module,exports){
 "use strict";
 /* global Symbol */
 var util = require('transduce-util'),
@@ -641,7 +670,7 @@ function _keys(obj){
   return keys;
 }
 
-},{"transduce-util":17}],17:[function(require,module,exports){
+},{"transduce-util":18}],18:[function(require,module,exports){
 "use strict";
 var undef,
     Arr = Array,
@@ -713,7 +742,7 @@ function append(result, input){
   return result + input;
 }
 
-},{}],18:[function(require,module,exports){
+},{}],19:[function(require,module,exports){
 "use strict";
 module.exports = compose;
 function compose(){

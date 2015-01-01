@@ -5,22 +5,111 @@ Create chains of composable ES6 Generators.
 
 Requires support for ES6 generators.  If using Node.js run with `node --harmony` and version 0.11 or better.
 
-### Transducers
+Example:
+
+```javascript
+var ng = require('nextgen')
+var nextGen = ng.compose(
+      ng.map(plus(1)),
+      ng.filter(isOdd),
+      ng.map(plus(3)),
+      ng.take(3))
+  var arr = ng.toArray(nextGen, [0, 1, 2, 3, 4])
+  t.deepEqual(arr, [4, 6, 8]);
+```
+
+Which is just sugar for:
+
+```javascript
+var ng = require('nextgen')
+var nextGen = ng.compose(
+      ng.map(plus(1)),
+      ng.filter(isOdd),
+      ng.map(plus(3)),
+      ng.take(3))
+var gen = nextGen([])
+gen.next()
+
+var next = gen.next({done: false, value: 0})
+// {done: false, value: [4]}
+
+next = gen.next({done: false, value: 1})
+// {done: false, value: [4]}
+
+next = gen.next({done: false, value: 2})
+// {done: false, value: [4, 6]}
+
+next = gen.next({done: false, value: 3})
+// {done: false, value: [4, 6]}
+
+next = gen.next({done: false, value: 4})
+// {done: true, value: [4, 6, 8]}
+```
+
+### Implementation
 This library is essentially an experimental implementation of transducers using ES6 generators and iterators. If you are not familiar with transducers, check out [Transducers Explained][1].
 
-Generator transducers are created by composing functions that accept a next generator and return a new generator. Each transformation accepts a next generator transformer to send optionally transformed arguments. The composed generator function accepts an appending terminal generator to accept and potentially aggregate the transformed items. If the appending generator generates into a specified array, or a new empty array if undefined. If implementing new generators, it is convenient to use `dispatch` to create generator transducers from generator functions.
+Generator transducers are created by composing functions that accept a next generator and return a new generator. Each transformation accepts a next generator transformer to send optionally transformed arguments. The composed generator function accepts an appending terminal generator to accept and potentially aggregate the transformed items.  If implementing new generators, it is convenient to use `dispatch` to create generator transducers from generator functions.
+
+ If an array is passed in place of a generator, the results will be concatenated onto the array. If a terminal generator is `undefined`, the results will be concatenated onto an empty array.
 
 The object sent and returned by all composed generators are defined in terms of iteration objects with `{done: boolean, value: value}`.   A transducer reduction can be signaled by sending `{done: true}` to the next generator.
 
 Relationship to transducers:
 
-- 0-arity init: Use initialization of generator before first `yield`
+- 0-arity init: Use initialization of generator before first `yield`.  Call `next` to initialize next generator.
 - 2-arity step: Yield each item from the generator in a loop, send transformed arguments as iteration arguments to next generator. Break on `{done: true}` from either iteration yield or result of sending `next` to next generator.
 - 1-arity result: Perform action outside of generator loop if iteration is done, but next generator is still accepting values.
 
 The result accumulator is hidden as state within the final appending transformer (which will be internal and generated into an array if not specified).  The generator transducers carry more state than transducers based on reducing functions. This allows containing state within the final generator.  Note, that this could prevent some applications of transducers in stateless contexts.
 
-More examples to come. For now, check out the source and tests for definition and use.
+Examples (from source):
+
+```javascript
+function* map(f, gen){
+  var next,
+      result = gen.next()
+  while(!result.done){
+    next = yield result.value
+    if(!next.done){
+      next = {done: false, value: f(next.value)}
+    }
+    result = gen.next(next)
+  }
+  return result.value
+}
+
+function* filter(p, gen){
+  var next,
+      result = gen.next()
+  while(!result.done){
+    next = yield result.value
+    if(next.done || p(next.value)){
+      result = gen.next(next)
+    }
+  }
+  return result.value
+}
+
+function* take(n, gen){
+  var i = 0,
+      result = gen.next()
+  while(!result.done){
+    result = gen.next(yield result.value)
+    if(!result.done && ++i >= n){
+      result = gen.next({done: true})
+    }
+  }
+  return result.value
+}
+
+module.exports = {
+  map: dispatch(map),
+  filter: dispatch(filter),
+  take: dispatch(take)
+}
+
+```
 
 
 ### API
