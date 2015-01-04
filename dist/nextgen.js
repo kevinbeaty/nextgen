@@ -1,6 +1,6 @@
 !function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var n;"undefined"!=typeof window?n=window:"undefined"!=typeof global?n=global:"undefined"!=typeof self&&(n=self),n.nextgen=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw (f.code="MODULE_NOT_FOUND", f)}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 'use strict'
-var compose = require('transduce-compose'),
+var compose = require('transduce-util').compose,
     dispatch = require('./lib/dispatch'),
     map = dispatch(require('./lib/map')),
     cat = dispatch(require('./lib/cat'))()
@@ -27,7 +27,7 @@ function mapcat(f){
   return compose(map(f), cat)
 }
 
-},{"./lib/cat":3,"./lib/dispatch":4,"./lib/drop":5,"./lib/dropWhile":6,"./lib/filter":7,"./lib/iterable":8,"./lib/map":9,"./lib/partitionAll":10,"./lib/partitionBy":11,"./lib/remove":12,"./lib/take":13,"./lib/takeWhile":14,"./lib/toArray":15,"transduce-compose":19}],2:[function(require,module,exports){
+},{"./lib/cat":3,"./lib/dispatch":4,"./lib/drop":5,"./lib/dropWhile":6,"./lib/filter":7,"./lib/iterable":8,"./lib/map":9,"./lib/partitionAll":10,"./lib/partitionBy":11,"./lib/remove":12,"./lib/take":13,"./lib/takeWhile":14,"./lib/toArray":15,"transduce-util":18}],2:[function(require,module,exports){
   'use strict';
 
   var arrayGen = regeneratorRuntime.mark(function arrayGen(arr) {
@@ -688,6 +688,11 @@ var undef,
 
 module.exports = {
   protocols: protocols,
+  compose: compose,
+  isReduced: isReduced,
+  reduced: reduced,
+  unreduced: unreduced,
+  deref: unreduced,
   isFunction: isFunction,
   isArray: isArray,
   isString: predicateToString('String'),
@@ -715,6 +720,40 @@ function predicateToString(type){
   };
 }
 
+function compose(){
+  var fns = arguments;
+  return function(xf){
+    var i = fns.length;
+    while(i--){
+      xf = fns[i](xf);
+    }
+    return xf;
+  };
+}
+
+function isReduced(value){
+  return !!(value instanceof Reduced || value && value.__transducers_reduced__);
+}
+
+function reduced(value, force){
+  if(force || !isReduced(value)){
+    value = new Reduced(value);
+  }
+  return value;
+}
+
+function unreduced(value){
+  if(isReduced(value)){
+    value = value.value;
+  }
+  return value;
+}
+
+function Reduced(value){
+  this.value = value;
+  this.__transducers_reduced__ = true;
+}
+
 function identity(result){
   return result;
 }
@@ -740,20 +779,6 @@ function merge(result, input){
 
 function append(result, input){
   return result + input;
-}
-
-},{}],19:[function(require,module,exports){
-"use strict";
-module.exports = compose;
-function compose(){
-  var fns = arguments;
-  return function(xf){
-    var i = fns.length;
-    while(i--){
-      xf = fns[i](xf);
-    }
-    return xf;
-  };
 }
 
 },{}]},{},[1])(1)
