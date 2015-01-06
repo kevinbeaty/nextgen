@@ -1,6 +1,6 @@
 {
   "name": "nextgen",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "Composable ES6 Generator Transformations",
   "main": "index.js",
   "scripts": {
@@ -23,8 +23,7 @@
   },
   "homepage": "http://github.com/kevinbeaty/nextgen",
   "dependencies": {
-    "iterator-protocol": "~0.2.0",
-    "transduce-util": "~0.2.0"
+    "transduce": "~0.4.1"
   },
   "devDependencies": {
     "tape": "~3.0.3",

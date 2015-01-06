@@ -1,6 +1,6 @@
 !function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var n;"undefined"!=typeof window?n=window:"undefined"!=typeof global?n=global:"undefined"!=typeof self&&(n=self),n.nextgen=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw (f.code="MODULE_NOT_FOUND", f)}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 'use strict'
-var compose = require('transduce-util').compose,
+var compose = require('transduce/util/compose'),
     dispatch = require('./lib/dispatch'),
     map = dispatch(require('./lib/map')),
     cat = dispatch(require('./lib/cat'))()
@@ -27,7 +27,7 @@ function mapcat(f){
   return compose(map(f), cat)
 }
 
-},{"./lib/cat":3,"./lib/dispatch":4,"./lib/drop":5,"./lib/dropWhile":6,"./lib/filter":7,"./lib/iterable":8,"./lib/map":9,"./lib/partitionAll":10,"./lib/partitionBy":11,"./lib/remove":12,"./lib/take":13,"./lib/takeWhile":14,"./lib/toArray":15,"transduce-util":18}],2:[function(require,module,exports){
+},{"./lib/cat":3,"./lib/dispatch":4,"./lib/drop":5,"./lib/dropWhile":6,"./lib/filter":7,"./lib/iterable":8,"./lib/map":9,"./lib/partitionAll":10,"./lib/partitionBy":11,"./lib/remove":12,"./lib/take":13,"./lib/takeWhile":14,"./lib/toArray":15,"transduce/util/compose":23}],2:[function(require,module,exports){
   'use strict';
 
   var arrayGen = regeneratorRuntime.mark(function arrayGen(arr) {
@@ -107,10 +107,10 @@ function mapcat(f){
     }, cat, this);
   });
 
-  var iterator = require('iterator-protocol').iterator;
+  var iterator = require('transduce/iterator/iterator');
 
   module.exports = cat;
-},{"iterator-protocol":17}],4:[function(require,module,exports){
+},{"transduce/iterator/iterator":19}],4:[function(require,module,exports){
 'use strict'
 var arrayGen = require('./arrayGen'),
     slice = [].slice
@@ -236,8 +236,8 @@ function dispatch(gen){
   module.exports = filter;
 },{}],8:[function(require,module,exports){
 'use strict'
-var ip = require('iterator-protocol'),
-    iterator = ip.iterator,
+var iterator = require('transduce/iterator/iterator'),
+    symbol = require('transduce/iterator/symbol'),
     value = require('./value')
 
 module.exports = iterable
@@ -249,7 +249,7 @@ function LazyIterable(gen, iter){
   this.gen = gen
   this.iter = iter
 }
-LazyIterable.prototype[ip.symbol] = function(){
+LazyIterable.prototype[symbol] = function(){
   var iter = iterator(this.iter),
       nextGen = this.gen([]),
       result = nextGen.next()
@@ -265,7 +265,7 @@ function shift(value){
   return value.shift()
 }
 
-},{"./value":16,"iterator-protocol":17}],9:[function(require,module,exports){
+},{"./value":16,"transduce/iterator/iterator":19,"transduce/iterator/symbol":21}],9:[function(require,module,exports){
   'use strict';
 
   var map = regeneratorRuntime.mark(function map(f, gen) {
@@ -517,15 +517,15 @@ function shift(value){
   module.exports = takeWhile;
 },{}],15:[function(require,module,exports){
 'use strict'
-var ip = require('iterator-protocol'),
+var iterToArray = require('transduce/iterator/iteratorToArray'),
     iterable = require('./iterable')
 
 module.exports = toArray
 function toArray(nextGen, iter){
-  return ip.toArray(iterable(nextGen, iter))
+  return iterToArray(iterable(nextGen, iter))
 }
 
-},{"./iterable":8,"iterator-protocol":17}],16:[function(require,module,exports){
+},{"./iterable":8,"transduce/iterator/iteratorToArray":20}],16:[function(require,module,exports){
 'use strict'
 
 module.exports = {
@@ -547,239 +547,180 @@ function done(value){
 }
 
 },{}],17:[function(require,module,exports){
-"use strict";
-/* global Symbol */
-var util = require('transduce-util'),
-    symbol = util.protocols.iterator,
-    isFunction = util.isFunction,
-    keys = Object.keys || _keys,
-    undef;
+'use strict'
+var symbol = require('./symbol')
 
-module.exports = {
-  symbol: symbol,
-  isIterable: isIterable,
-  isIterator: isIterator,
-  iterable: iterable,
-  iterator: iterator,
-  toArray: toArray
-};
-
-function toArray(iter){
-  iter = iterator(iter);
-  var next = iter.next(),
-      arr = [];
-  while(!next.done){
-    arr.push(next.value);
-    next = iter.next();
-  }
-  return arr;
-}
-
+module.exports =
 function isIterable(value){
-  return (value[symbol] !== undef);
+  return (value[symbol] !== void 0)
 }
 
-function isIterator(value){
-  return isIterable(value) ||
-    (isFunction(value.next));
-}
+},{"./symbol":21}],18:[function(require,module,exports){
+'use strict'
+var isIterable = require('./isIterable'),
+    symbol = require('./symbol'),
+    isArray = require('../util/isArray'),
+    isFunction = require('../util/isFunction'),
+    isString = require('../util/isString'),
+    keys = Object.keys || _keys
 
+module.exports =
 function iterable(value){
-  var it;
+  var it
   if(isIterable(value)){
-    it = value;
-  } else if(util.isArray(value) || util.isString(value)){
-    it = new ArrayIterable(value);
+    it = value
+  } else if(isArray(value) || isString(value)){
+    it = new ArrayIterable(value)
   } else if(isFunction(value)){
-    it = new FunctionIterable(value);
+    it = new FunctionIterable(value)
   } else {
-    it = new ObjectIterable(value);
+    it = new ObjectIterable(value)
   }
-  return it;
-}
-
-function iterator(value){
-  var it = iterable(value);
-  if(it !== undef){
-    it = it[symbol]();
-  } else if(isFunction(value.next)){
-    // handle non-well-formed iterators that only have a next method
-    it = value;
-  }
-  return it;
+  return it
 }
 
 // Wrap an Array into an iterable
 function ArrayIterable(arr){
-  this.arr = arr;
+  this.arr = arr
 }
 ArrayIterable.prototype[symbol] = function(){
   var arr = this.arr,
-      idx = 0;
+      idx = 0
   return {
     next: function(){
       if(idx >= arr.length){
-        return {done: true};
+        return {done: true}
       }
 
-      return {done: false, value: arr[idx++]};
+      return {done: false, value: arr[idx++]}
     }
-  };
-};
+  }
+}
 
 // Wrap an function into an iterable that calls function on every next
 function FunctionIterable(fn){
-  this.fn = fn;
+  this.fn = fn
 }
 FunctionIterable.prototype[symbol] = function(){
-  var fn = this.fn;
+  var fn = this.fn
   return {
     next: function(){
-      return {done: false, value: fn()};
+      return {done: false, value: fn()}
     }
-  };
-};
+  }
+}
 
 // Wrap an Object into an iterable. iterates [key, val]
 function ObjectIterable(obj){
-  this.obj = obj;
-  this.keys = keys(obj);
+  this.obj = obj
+  this.keys = keys(obj)
 }
 ObjectIterable.prototype[symbol] = function(){
   var obj = this.obj,
       keys = this.keys,
-      idx = 0;
+      idx = 0
   return {
     next: function(){
       if(idx >= keys.length){
-        return {done: true};
+        return {done: true}
       }
-      var key = keys[idx++];
-      return {done: false, value: [key, obj[key]]};
+      var key = keys[idx++]
+      return {done: false, value: [key, obj[key]]}
     }
-  };
-};
+  }
+}
 
 function _keys(obj){
-  var prop, keys = [];
+  var prop, keys = []
   for(prop in obj){
     if(obj.hasOwnProperty(prop)){
-      keys.push(prop);
+      keys.push(prop)
     }
   }
-  return keys;
+  return keys
 }
 
-},{"transduce-util":18}],18:[function(require,module,exports){
-"use strict";
-var undef,
-    Arr = Array,
-    toString = Object.prototype.toString,
-    isArray = (isFunction(Arr.isArray) ? Arr.isArray : predicateToString('Array')),
-    /* global Symbol */
-    symbolExists = typeof Symbol !== 'undefined',
-    symIterator = symbolExists ? Symbol.iterator : '@@iterator',
+},{"../util/isArray":24,"../util/isFunction":25,"../util/isString":26,"./isIterable":17,"./symbol":21}],19:[function(require,module,exports){
+'use strict'
+var symbol = require('./symbol'),
+    iterable = require('./iterable'),
+    isFunction = require('../util/isFunction')
+
+module.exports =
+function iterator(value){
+  var it = iterable(value)
+  if(it !== void 0){
+    it = it[symbol]()
+  } else if(isFunction(value.next)){
+    // handle non-well-formed iterators that only have a next method
+    it = value
+  }
+  return it
+}
+
+},{"../util/isFunction":25,"./iterable":18,"./symbol":21}],20:[function(require,module,exports){
+'use strict'
+var iterator = require('./iterator')
+
+module.exports =
+function toArray(iter){
+  iter = iterator(iter)
+  var next = iter.next(),
+      arr = []
+  while(!next.done){
+    arr.push(next.value)
+    next = iter.next()
+  }
+  return arr
+}
+
+},{"./iterator":19}],21:[function(require,module,exports){
+'use strict'
+var /* global Symbol */
     /* jshint newcap:false */
-    symTransformer = symbolExists ? Symbol('transformer') : '@@transformer',
-    protocols = {
-      iterator: symIterator,
-      transformer: symTransformer
-    };
+    symbolExists = typeof Symbol !== 'undefined'
+module.exports = symbolExists ? Symbol.iterator : '@@iterator'
 
-module.exports = {
-  protocols: protocols,
-  compose: compose,
-  isReduced: isReduced,
-  reduced: reduced,
-  unreduced: unreduced,
-  deref: unreduced,
-  isFunction: isFunction,
-  isArray: isArray,
-  isString: predicateToString('String'),
-  isRegExp: predicateToString('RegExp'),
-  isNumber: predicateToString('Number'),
-  isUndefined: isUndefined,
-  identity: identity,
-  arrayPush: push,
-  objectMerge: merge,
-  stringAppend: append
-};
+},{}],22:[function(require,module,exports){
+'use strict'
+var toString = Object.prototype.toString
 
-function isFunction(value){
-  return typeof value === 'function';
-}
-
-function isUndefined(value){
-  return value === undef;
-}
-
+module.exports =
 function predicateToString(type){
-  var str = '[object '+type+']';
+  var str = '[object '+type+']'
   return function(value){
-    return toString.call(value) === str;
-  };
+    return toString.call(value) === str
+  }
 }
 
+},{}],23:[function(require,module,exports){
+'use strict'
+
+module.exports =
 function compose(){
-  var fns = arguments;
+  var fns = arguments
   return function(xf){
-    var i = fns.length;
+    var i = fns.length
     while(i--){
-      xf = fns[i](xf);
+      xf = fns[i](xf)
     }
-    return xf;
-  };
-}
-
-function isReduced(value){
-  return !!(value instanceof Reduced || value && value.__transducers_reduced__);
-}
-
-function reduced(value, force){
-  if(force || !isReduced(value)){
-    value = new Reduced(value);
+    return xf
   }
-  return value;
 }
 
-function unreduced(value){
-  if(isReduced(value)){
-    value = value.value;
-  }
-  return value;
+},{}],24:[function(require,module,exports){
+module.exports = Array.isArray || require('./_predicateToString')('Array')
+
+},{"./_predicateToString":22}],25:[function(require,module,exports){
+'use strict'
+
+module.exports =
+function isFunction(value){
+  return typeof value === 'function'
 }
 
-function Reduced(value){
-  this.value = value;
-  this.__transducers_reduced__ = true;
-}
+},{}],26:[function(require,module,exports){
+module.exports = require('./_predicateToString')('String')
 
-function identity(result){
-  return result;
-}
-
-function push(result, input){
-  result.push(input);
-  return result;
-}
-
-function merge(result, input){
-  if(isArray(input) && input.length === 2){
-    result[input[0]] = input[1];
-  } else {
-    var prop;
-    for(prop in input){
-      if(input.hasOwnProperty(prop)){
-        result[prop] = input[prop];
-      }
-    }
-  }
-  return result;
-}
-
-function append(result, input){
-  return result + input;
-}
-
-},{}]},{},[1])(1)
+},{"./_predicateToString":22}]},{},[1])(1)
 });

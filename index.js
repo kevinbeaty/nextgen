@@ -1,5 +1,5 @@
 'use strict'
-var compose = require('transduce-util').compose,
+var compose = require('transduce/util/compose'),
     dispatch = require('./lib/dispatch'),
     map = dispatch(require('./lib/map')),
     cat = dispatch(require('./lib/cat'))()
