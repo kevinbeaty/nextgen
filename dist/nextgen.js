@@ -1,6 +1,6 @@
 !function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var n;"undefined"!=typeof window?n=window:"undefined"!=typeof global?n=global:"undefined"!=typeof self&&(n=self),n.nextgen=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw (f.code="MODULE_NOT_FOUND", f)}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 'use strict'
-var compose = require('transduce/util/compose'),
+var compose = require('transduce/base/compose'),
     dispatch = require('./lib/dispatch'),
     map = dispatch(require('./lib/map')),
     cat = dispatch(require('./lib/cat'))()
@@ -27,7 +27,7 @@ function mapcat(f){
   return compose(map(f), cat)
 }
 
-},{"./lib/cat":3,"./lib/dispatch":4,"./lib/drop":5,"./lib/dropWhile":6,"./lib/filter":7,"./lib/iterable":8,"./lib/map":9,"./lib/partitionAll":10,"./lib/partitionBy":11,"./lib/remove":12,"./lib/take":13,"./lib/takeWhile":14,"./lib/toArray":15,"transduce/util/compose":23}],2:[function(require,module,exports){
+},{"./lib/cat":3,"./lib/dispatch":4,"./lib/drop":5,"./lib/dropWhile":6,"./lib/filter":7,"./lib/iterable":8,"./lib/map":9,"./lib/partitionAll":10,"./lib/partitionBy":11,"./lib/remove":12,"./lib/take":13,"./lib/takeWhile":14,"./lib/toArray":15,"transduce/base/compose":17}],2:[function(require,module,exports){
   'use strict';
 
   var arrayGen = regeneratorRuntime.mark(function arrayGen(arr) {
@@ -110,7 +110,7 @@ function mapcat(f){
   var iterator = require('transduce/iterator/iterator');
 
   module.exports = cat;
-},{"transduce/iterator/iterator":19}],4:[function(require,module,exports){
+},{"transduce/iterator/iterator":20}],4:[function(require,module,exports){
 'use strict'
 var arrayGen = require('./arrayGen'),
     slice = [].slice
@@ -265,7 +265,7 @@ function shift(value){
   return value.shift()
 }
 
-},{"./value":16,"transduce/iterator/iterator":19,"transduce/iterator/symbol":21}],9:[function(require,module,exports){
+},{"./value":16,"transduce/iterator/iterator":20,"transduce/iterator/symbol":21}],9:[function(require,module,exports){
   'use strict';
 
   var map = regeneratorRuntime.mark(function map(f, gen) {
@@ -517,7 +517,7 @@ function shift(value){
   module.exports = takeWhile;
 },{}],15:[function(require,module,exports){
 'use strict'
-var iterToArray = require('transduce/iterator/iteratorToArray'),
+var iterToArray = require('transduce/iterator/toArray'),
     iterable = require('./iterable')
 
 module.exports = toArray
@@ -525,7 +525,7 @@ function toArray(nextGen, iter){
   return iterToArray(iterable(nextGen, iter))
 }
 
-},{"./iterable":8,"transduce/iterator/iteratorToArray":20}],16:[function(require,module,exports){
+},{"./iterable":8,"transduce/iterator/toArray":22}],16:[function(require,module,exports){
 'use strict'
 
 module.exports = {
@@ -548,6 +548,21 @@ function done(value){
 
 },{}],17:[function(require,module,exports){
 'use strict'
+
+module.exports =
+function compose(){
+  var fns = arguments
+  return function(xf){
+    var i = fns.length
+    while(i--){
+      xf = fns[i](xf)
+    }
+    return xf
+  }
+}
+
+},{}],18:[function(require,module,exports){
+'use strict'
 var symbol = require('./symbol')
 
 module.exports =
@@ -555,7 +570,7 @@ function isIterable(value){
   return (value[symbol] !== void 0)
 }
 
-},{"./symbol":21}],18:[function(require,module,exports){
+},{"./symbol":21}],19:[function(require,module,exports){
 'use strict'
 var isIterable = require('./isIterable'),
     symbol = require('./symbol'),
@@ -640,7 +655,7 @@ function _keys(obj){
   return keys
 }
 
-},{"../util/isArray":24,"../util/isFunction":25,"../util/isString":26,"./isIterable":17,"./symbol":21}],19:[function(require,module,exports){
+},{"../util/isArray":24,"../util/isFunction":25,"../util/isString":26,"./isIterable":18,"./symbol":21}],20:[function(require,module,exports){
 'use strict'
 var symbol = require('./symbol'),
     iterable = require('./iterable'),
@@ -658,7 +673,14 @@ function iterator(value){
   return it
 }
 
-},{"../util/isFunction":25,"./iterable":18,"./symbol":21}],20:[function(require,module,exports){
+},{"../util/isFunction":25,"./iterable":19,"./symbol":21}],21:[function(require,module,exports){
+'use strict'
+var /* global Symbol */
+    /* jshint newcap:false */
+    symbolExists = typeof Symbol !== 'undefined'
+module.exports = symbolExists ? Symbol.iterator : '@@iterator'
+
+},{}],22:[function(require,module,exports){
 'use strict'
 var iterator = require('./iterator')
 
@@ -674,14 +696,7 @@ function toArray(iter){
   return arr
 }
 
-},{"./iterator":19}],21:[function(require,module,exports){
-'use strict'
-var /* global Symbol */
-    /* jshint newcap:false */
-    symbolExists = typeof Symbol !== 'undefined'
-module.exports = symbolExists ? Symbol.iterator : '@@iterator'
-
-},{}],22:[function(require,module,exports){
+},{"./iterator":20}],23:[function(require,module,exports){
 'use strict'
 var toString = Object.prototype.toString
 
@@ -693,25 +708,10 @@ function predicateToString(type){
   }
 }
 
-},{}],23:[function(require,module,exports){
-'use strict'
-
-module.exports =
-function compose(){
-  var fns = arguments
-  return function(xf){
-    var i = fns.length
-    while(i--){
-      xf = fns[i](xf)
-    }
-    return xf
-  }
-}
-
 },{}],24:[function(require,module,exports){
 module.exports = Array.isArray || require('./_predicateToString')('Array')
 
-},{"./_predicateToString":22}],25:[function(require,module,exports){
+},{"./_predicateToString":23}],25:[function(require,module,exports){
 'use strict'
 
 module.exports =
@@ -722,5 +722,5 @@ function isFunction(value){
 },{}],26:[function(require,module,exports){
 module.exports = require('./_predicateToString')('String')
 
-},{"./_predicateToString":22}]},{},[1])(1)
+},{"./_predicateToString":23}]},{},[1])(1)
 });
