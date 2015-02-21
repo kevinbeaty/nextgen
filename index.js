@@ -1,8 +1,9 @@
 'use strict'
-var compose = require('transduce/base/compose'),
-    dispatch = require('./lib/dispatch'),
+var dispatch = require('./lib/dispatch'),
     map = dispatch(require('./lib/map')),
-    cat = dispatch(require('./lib/cat'))()
+    cat = dispatch(require('./lib/cat'))(),
+    util = require('./lib/util'),
+    compose = util.compose
 
 module.exports = {
   compose: compose,
